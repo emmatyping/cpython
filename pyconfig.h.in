@@ -1615,6 +1615,9 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H
 
+/* Define to 1 if you have the <zstd.h> header file. */
+#undef HAVE_ZSTD_H
+
 /* Define to 1 if you have the '_getpty' function. */
 #undef HAVE__GETPTY
 
