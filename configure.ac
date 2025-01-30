@@ -5395,7 +5395,7 @@ PKG_CHECK_MODULES([LIBZSTD], [libzstd], [have_libzstd=yes], [
   WITH_SAVE_ENV([
     CPPFLAGS="$CPPFLAGS $LIBZSTD_CFLAGS"
     LIBS="$LIBS $LIBZSTD_LIBS"
-    AC_CHECK_HEADERS([zstd.h], [
+    AC_CHECK_HEADERS([zstd.h zdict.h], [
       AC_CHECK_LIB([zstd], [ZSTD_compress], [have_libzstd=yes], [have_libzstd=no])
     ], [have_libzstd=no])
     AS_VAR_IF([have_libzstd], [yes], [
@@ -7062,6 +7062,7 @@ SRCDIRS="\
   Modules/_xxtestfuzz \
   Modules/cjkcodecs \
   Modules/expat \
+  Modules/_zstd \
   Objects \
   Objects/mimalloc \
   Objects/mimalloc/prim \

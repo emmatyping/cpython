@@ -1609,6 +1609,9 @@
 /* Define to 1 if you have the 'writev' function. */
 #undef HAVE_WRITEV
 
+/* Define to 1 if you have the <zdict.h> header file. */
+#undef HAVE_ZDICT_H
+
 /* Define if the zlib library has inflateCopy */
 #undef HAVE_ZLIB_COPY
 

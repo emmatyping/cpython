@@ -22414,12 +22414,15 @@ save_LIBS=$LIBS
 
     CPPFLAGS="$CPPFLAGS $LIBZSTD_CFLAGS"
     LIBS="$LIBS $LIBZSTD_LIBS"
-           for ac_header in zstd.h
+           for ac_header in zstd.h zdict.h
 do :
-  ac_fn_c_check_header_compile "$LINENO" "zstd.h" "ac_cv_header_zstd_h" "$ac_includes_default"
-if test "x$ac_cv_header_zstd_h" = xyes
+  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | sed "$as_sed_sh"`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"
 then :
-  printf "%s\n" "#define HAVE_ZSTD_H 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define `printf "%s\n" "HAVE_$ac_header" | sed "$as_sed_cpp"` 1
+_ACEOF
 
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ZSTD_compress in -lzstd" >&5
 printf %s "checking for ZSTD_compress in -lzstd... " >&6; }
@@ -22506,12 +22509,15 @@ save_LIBS=$LIBS
 
     CPPFLAGS="$CPPFLAGS $LIBZSTD_CFLAGS"
     LIBS="$LIBS $LIBZSTD_LIBS"
-           for ac_header in zstd.h
+           for ac_header in zstd.h zdict.h
 do :
-  ac_fn_c_check_header_compile "$LINENO" "zstd.h" "ac_cv_header_zstd_h" "$ac_includes_default"
-if test "x$ac_cv_header_zstd_h" = xyes
+  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | sed "$as_sed_sh"`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"
 then :
-  printf "%s\n" "#define HAVE_ZSTD_H 1" >>confdefs.h
+  cat >>confdefs.h <<_ACEOF
+#define `printf "%s\n" "HAVE_$ac_header" | sed "$as_sed_cpp"` 1
+_ACEOF
 
       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ZSTD_compress in -lzstd" >&5
 printf %s "checking for ZSTD_compress in -lzstd... " >&6; }
@@ -29536,6 +29542,7 @@ SRCDIRS="\
   Modules/_xxtestfuzz \
   Modules/cjkcodecs \
   Modules/expat \
+  Modules/_zstd \
   Objects \
   Objects/mimalloc \
   Objects/mimalloc/prim \
