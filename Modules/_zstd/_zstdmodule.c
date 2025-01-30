@@ -23,6 +23,58 @@ module _zstd
      Module level functions
    -------------------------- */
 
+/* Format error message and set ZstdError. */
+void
+set_zstd_error(const _zstd_state* const state,
+               const error_type type, const size_t zstd_ret)
+{
+    char buf[128];
+    char *msg;
+    assert(ZSTD_isError(zstd_ret));
+
+    switch (type)
+    {
+    case ERR_DECOMPRESS:
+        msg = "Unable to decompress zstd data: %s";
+        break;
+    case ERR_COMPRESS:
+        msg = "Unable to compress zstd data: %s";
+        break;
+    case ERR_SET_PLEDGED_INPUT_SIZE:
+        msg = "Unable to set pledged uncompressed content size: %s";
+        break;
+
+    case ERR_LOAD_D_DICT:
+        msg = "Unable to load zstd dictionary or prefix for decompression: %s";
+        break;
+    case ERR_LOAD_C_DICT:
+        msg = "Unable to load zstd dictionary or prefix for compression: %s";
+        break;
+
+    case ERR_GET_C_BOUNDS:
+        msg = "Unable to get zstd compression parameter bounds: %s";
+        break;
+    case ERR_GET_D_BOUNDS:
+        msg = "Unable to get zstd decompression parameter bounds: %s";
+        break;
+    case ERR_SET_C_LEVEL:
+        msg = "Unable to set zstd compression level: %s";
+        break;
+
+    case ERR_TRAIN_DICT:
+        msg = "Unable to train zstd dictionary: %s";
+        break;
+    case ERR_FINALIZE_DICT:
+        msg = "Unable to finalize zstd dictionary: %s";
+        break;
+
+    default:
+        Py_UNREACHABLE();
+    }
+    PyOS_snprintf(buf, sizeof(buf), msg, ZSTD_getErrorName(zstd_ret));
+    PyErr_SetString(state->ZstdError, buf);
+}
+
 
 /* -------------------------
      Train dictionary code
@@ -158,8 +210,8 @@ _zstd__finalize_dict_impl(PyObject *module, PyBytesObject *custom_dict_bytes,
     PyErr_Format(PyExc_NotImplementedError,
                  "_finalize_dict function only available when the underlying "
                  "zstd library's version is greater than or equal to v1.4.5. "
-                 "At pyzstd module's compile-time, zstd version < v1.4.5. At "
-                 "pyzstd module's run-time, zstd version is v%s.",
+                 "At _zstd module's compile-time, zstd version < v1.4.5. At "
+                 "_zstd module's run-time, zstd version is v%s.",
                  ZSTD_versionString());
     return NULL;
 #else
@@ -168,8 +220,8 @@ _zstd__finalize_dict_impl(PyObject *module, PyBytesObject *custom_dict_bytes,
         PyErr_Format(PyExc_NotImplementedError,
                 "_finalize_dict function only available when the underlying "
                 "zstd library's version is greater than or equal to v1.4.5. "
-                "At pyzstd module's compile-time, zstd version >= v1.4.5. At "
-                "pyzstd module's run-time, zstd version is v%s.",
+                "At _zstd module's compile-time, zstd version >= v1.4.5. At "
+                "_zstd module's run-time, zstd version is v%s.",
                 ZSTD_versionString());
         return NULL;
     }
@@ -542,7 +594,7 @@ add_vars_to_module(PyObject *module)
         return -1;
     }
 
-    /* PYZSTD_CONFIG */
+    /* _ZSTD_CONFIG */
     obj = Py_BuildValue("isOOO", 8*(int)sizeof(Py_ssize_t), "c",
                         Py_False,
                         Py_True,
@@ -553,7 +605,7 @@ add_vars_to_module(PyObject *module)
                         Py_False
 #endif
                         );
-    if (PyModule_AddObject(module, "PYZSTD_CONFIG", obj) < 0) {
+    if (PyModule_AddObject(module, "_ZSTD_CONFIG", obj) < 0) {
         Py_XDECREF(obj);
         return -1;
     }
@@ -568,6 +620,23 @@ add_vars_to_module(PyObject *module)
             return -1;                                     \
         }                                                  \
     } while(0)
+
+static inline int
+add_type_to_module(PyObject *module, const char *name,
+                   PyType_Spec *type_spec, PyTypeObject **dest)
+{
+    PyObject *temp = PyType_FromModuleAndSpec(module, type_spec, NULL);
+
+    if (PyModule_AddObject(module, name, temp) < 0) {
+        Py_XDECREF(temp);
+        return -1;
+    }
+
+    Py_INCREF(temp);
+    *dest = (PyTypeObject*) temp;
+
+    return 0;
+}
 
 static int _zstd_exec(PyObject *module) {
     STATE_FROM_MODULE(module);
@@ -600,7 +669,7 @@ static int _zstd_exec(PyObject *module) {
 
     /* ZstdError */
     MS_MEMBER(ZstdError) = PyErr_NewExceptionWithDoc(
-                                  "pyzstd.ZstdError",
+                                  "_zstd.ZstdError",
                                   "Call to the underlying zstd library failed.",
                                   NULL, NULL);
     if (MS_MEMBER(ZstdError) == NULL) {
@@ -613,7 +682,7 @@ static int _zstd_exec(PyObject *module) {
         return -1;
     }
 
-    /* ZstdDict 
+    /* ZstdDict */
     if (add_type_to_module(module,
                            "ZstdDict",
                            &zstddict_type_spec,
@@ -621,7 +690,7 @@ static int _zstd_exec(PyObject *module) {
         return -1;
     }
 
-    // ZstdCompressor 
+    /* // ZstdCompressor 
     if (add_type_to_module(module,
                            "ZstdCompressor",
                            &zstdcompressor_type_spec,
@@ -703,8 +772,8 @@ _zstd_traverse(PyObject *module, visitproc visit, void *arg)
     Py_VISIT(MS_MEMBER(str_write));
     Py_VISIT(MS_MEMBER(str_flush));
 
-    /*Py_VISIT(MS_MEMBER(ZstdDict_type));
-    Py_VISIT(MS_MEMBER(ZstdCompressor_type));
+    Py_VISIT(MS_MEMBER(ZstdDict_type));
+    /*Py_VISIT(MS_MEMBER(ZstdCompressor_type));
     Py_VISIT(MS_MEMBER(RichMemZstdCompressor_type));
     Py_VISIT(MS_MEMBER(ZstdDecompressor_type));
     Py_VISIT(MS_MEMBER(EndlessZstdDecompressor_type));
@@ -729,8 +798,8 @@ _zstd_clear(PyObject *module)
     Py_CLEAR(MS_MEMBER(str_write));
     Py_CLEAR(MS_MEMBER(str_flush));
 
-    /*Py_CLEAR(MS_MEMBER(ZstdDict_type));
-    Py_CLEAR(MS_MEMBER(ZstdCompressor_type));
+    Py_CLEAR(MS_MEMBER(ZstdDict_type));
+    /*Py_CLEAR(MS_MEMBER(ZstdCompressor_type));
     Py_CLEAR(MS_MEMBER(RichMemZstdCompressor_type));
     Py_CLEAR(MS_MEMBER(ZstdDecompressor_type));
     Py_CLEAR(MS_MEMBER(EndlessZstdDecompressor_type));
