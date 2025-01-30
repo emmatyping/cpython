@@ -22,3 +22,4 @@ TODOs:
 7. Should we provide a `_zstd.compress(bytes)`?
 8. ^ or generally provide buffer protocol support?
 9. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
+10. Is there a better way to handle `__new__` with clinic?
