@@ -1,3 +1,4 @@
+#pragma once
 /*
 Low level interface to Meta's zstd library for use in the `zstd` Python library.
 
@@ -77,6 +78,30 @@ struct _zstd_state {
     //PyTypeObject *CParameter_type;
     //PyTypeObject *DParameter_type;
 };
+
+typedef struct {
+    PyObject_HEAD
+
+    /* Thread lock for generating ZSTD_CDict/ZSTD_DDict */
+    PyThread_type_lock lock;
+
+    /* Reusable compress/decompress dictionary, they are created once and
+       can be shared by multiple threads concurrently, since its usage is
+       read-only.
+       c_dicts is a dict, int(compressionLevel):PyCapsule(ZSTD_CDict*) */
+    ZSTD_DDict *d_dict;
+    PyObject *c_dicts;
+
+    /* Content of the dictionary, bytes object. */
+    PyObject *dict_content;
+    /* Dictionary id */
+    uint32_t dict_id;
+
+    /* __init__ has been called, 0 or 1. */
+    int inited;
+    
+    _zstd_state *module_state;
+} ZstdDict;
 
 typedef enum {
     ERR_DECOMPRESS,
