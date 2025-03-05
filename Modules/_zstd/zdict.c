@@ -24,30 +24,6 @@ class _zstd.ZstdDict "PyObject *" "clinic_state()->ZstdDict_type"
      ZstdDict code
    ----------------- */
 
-typedef struct {
-    PyObject_HEAD
-
-    /* Thread lock for generating ZSTD_CDict/ZSTD_DDict */
-    PyThread_type_lock lock;
-
-    /* Reusable compress/decompress dictionary, they are created once and
-       can be shared by multiple threads concurrently, since its usage is
-       read-only.
-       c_dicts is a dict, int(compressionLevel):PyCapsule(ZSTD_CDict*) */
-    ZSTD_DDict *d_dict;
-    PyObject *c_dicts;
-
-    /* Content of the dictionary, bytes object. */
-    PyObject *dict_content;
-    /* Dictionary id */
-    uint32_t dict_id;
-
-    /* __init__ has been called, 0 or 1. */
-    int inited;
-    
-    _zstd_state *module_state;
-} ZstdDict;
-
 /*[clinic input]
 @classmethod
 _zstd.ZstdDict.__new__
@@ -180,25 +156,35 @@ _zstd_ZstdDict___init___impl(ZstdDict *self, PyObject *dict_content,
     return 0;
 }
 
+
+/*[clinic input]
+_zstd.ZstdDict.__reduce__
+
+Intentionally not supporting pickle.
+[clinic start generated code]*/
+
 static PyObject *
-ZstdDict_reduce(PyObject *self, PyObject *args)
+_zstd_ZstdDict___reduce___impl(PyObject *self)
+/*[clinic end generated code: output=e20d2153a89fd03c input=3b3bf01bc131f928]*/
 {
     /* return Py_BuildValue("O(On)", Py_TYPE(self),
                             self->dict_content,
                             self->dict_id == 0);
        v0.15.7 added .as_* attributes, pickle will cause more confusion. */
     PyErr_SetString(PyExc_TypeError,
-                    "ZstdDict object intentionally doesn't support pickle. If need "
+                    "ZstdDict object intentionally doesn't support pickle. If you need "
                     "to save zstd dictionary to disk, please save .dict_content "
                     "attribute, it's a bytes object. So that the zstd dictionary "
                     "can be used with other programs.");
     return NULL;
 }
 
-static PyMethodDef ZstdDict_methods[] = {
-    {"__reduce__", (PyCFunction)ZstdDict_reduce,
-     METH_NOARGS, reduce_cannot_pickle_doc},
+#define clinic_state() ((_zstd_state*)PyType_GetModuleState(type))
+#include "clinic/zdict.c.h"
+#undef clinic_state
 
+static PyMethodDef ZstdDict_methods[] = {
+    _ZSTD_ZSTDDICT___REDUCE___METHODDEF
     {0}
 };
 
@@ -294,10 +280,6 @@ _zstd_ZstdDict_as_prefix_get_impl(PyObject *self)
 {
     return Py_BuildValue("Oi", self, DICT_TYPE_PREFIX);
 }
-
-#define clinic_state() ((_zstd_state*)PyType_GetModuleState(type))
-#include "clinic/zdict.c.h"
-#undef clinic_state
 
 static PyGetSetDef ZstdDict_getset[] = {
     _ZSTD_ZSTDDICT_AS_DIGESTED_DICT_GETSETDEF

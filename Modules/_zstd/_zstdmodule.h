@@ -1,3 +1,4 @@
+#pragma once
 /*
 Low level interface to Meta's zstd library for use in the `zstd` Python library.
 
@@ -18,11 +19,19 @@ Refactored for the CPython standard library by Emma Harper Smith.
     #error "_zstd module requires zstd v1.4.0+"
 #endif
 
-#include "pycore_blocks_output_buffer.h"
-
-
 /* Forward declaration of module state */
 typedef struct _zstd_state _zstd_state;
+
+/* ------------------
+     Global macro
+   ------------------ */
+#define ACQUIRE_LOCK(obj) do {                    \
+if (!PyThread_acquire_lock((obj)->lock, 0)) { \
+    Py_BEGIN_ALLOW_THREADS                    \
+    PyThread_acquire_lock((obj)->lock, 1);    \
+    Py_END_ALLOW_THREADS                      \
+} } while (0)
+#define RELEASE_LOCK(obj) PyThread_release_lock((obj)->lock)
 
 /* Get module state from a class type, and set it to supported object.
     Used in Py_tp_new or Py_tp_init. */
@@ -49,9 +58,8 @@ typedef struct _zstd_state _zstd_state;
 
 
 extern PyType_Spec zstddict_type_spec;
-/*
 extern PyType_Spec zstdcompressor_type_spec;
-extern PyType_Spec ZstdDecompressor_type_spec;
+/*extern PyType_Spec ZstdDecompressor_type_spec;
 extern PyType_Spec EndlessZstdDecompressor_type_spec;
 extern PyType_Spec ZstdFileReader_type_spec;
 extern PyType_Spec ZstdFileWriter_type_spec;
@@ -66,17 +74,41 @@ struct _zstd_state {
     PyObject *str_flush;
 
     PyTypeObject *ZstdDict_type;
-    /*PyTypeObject *ZstdCompressor_type;
-    PyTypeObject *RichMemZstdCompressor_type;
+    PyTypeObject *ZstdCompressor_type;
+    /*PyTypeObject *RichMemZstdCompressor_type;
     PyTypeObject *ZstdDecompressor_type;
     PyTypeObject *EndlessZstdDecompressor_type;
     PyTypeObject *ZstdFileReader_type;
     PyTypeObject *ZstdFileWriter_type;*/
     PyObject *ZstdError;
 
-    //PyTypeObject *CParameter_type;
-    //PyTypeObject *DParameter_type;
+    PyTypeObject *CParameter_type;
+    PyTypeObject *DParameter_type;
 };
+
+typedef struct {
+    PyObject_HEAD
+
+    /* Thread lock for generating ZSTD_CDict/ZSTD_DDict */
+    PyThread_type_lock lock;
+
+    /* Reusable compress/decompress dictionary, they are created once and
+       can be shared by multiple threads concurrently, since its usage is
+       read-only.
+       c_dicts is a dict, int(compressionLevel):PyCapsule(ZSTD_CDict*) */
+    ZSTD_DDict *d_dict;
+    PyObject *c_dicts;
+
+    /* Content of the dictionary, bytes object. */
+    PyObject *dict_content;
+    /* Dictionary id */
+    uint32_t dict_id;
+
+    /* __init__ has been called, 0 or 1. */
+    int inited;
+    
+    _zstd_state *module_state;
+} ZstdDict;
 
 typedef enum {
     ERR_DECOMPRESS,
@@ -105,7 +137,8 @@ extern void
 set_zstd_error(const _zstd_state* const state,
                const error_type type, const size_t zstd_ret);
 
-static const char init_twice_msg[] = "__init__ method is called twice.";
+extern void
+set_parameter_error(const _zstd_state* const state, int is_compress,
+                    int key_v, int value_v);
 
-PyDoc_STRVAR(reduce_cannot_pickle_doc,
-"Intentionally not supporting pickle.");
+static const char init_twice_msg[] = "__init__ method is called twice.";

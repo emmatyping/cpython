@@ -20,7 +20,7 @@ module _zstd
 #include "clinic/_zstdmodule.c.h"
 
 /* --------------------------
-     Module level functions
+     Module level error handling
    -------------------------- */
 
 /* Format error message and set ZstdError. */
@@ -75,6 +75,107 @@ set_zstd_error(const _zstd_state* const state,
     PyErr_SetString(state->ZstdError, buf);
 }
 
+typedef struct {
+    const int parameter;
+    const char parameter_name[32];
+} ParameterInfo;
+
+static const ParameterInfo cp_list[] =
+{
+    {ZSTD_c_compressionLevel, "compressionLevel"},
+    {ZSTD_c_windowLog,        "windowLog"},
+    {ZSTD_c_hashLog,          "hashLog"},
+    {ZSTD_c_chainLog,         "chainLog"},
+    {ZSTD_c_searchLog,        "searchLog"},
+    {ZSTD_c_minMatch,         "minMatch"},
+    {ZSTD_c_targetLength,     "targetLength"},
+    {ZSTD_c_strategy,         "strategy"},
+
+// TODO(emmatyping): Should this be decided at runtime or left out?
+#if ZSTD_VERSION_NUMBER >= 10506
+    {ZSTD_c_targetCBlockSize, "targetCBlockSize"},
+#endif
+
+    {ZSTD_c_enableLongDistanceMatching, "enableLongDistanceMatching"},
+    {ZSTD_c_ldmHashLog,       "ldmHashLog"},
+    {ZSTD_c_ldmMinMatch,      "ldmMinMatch"},
+    {ZSTD_c_ldmBucketSizeLog, "ldmBucketSizeLog"},
+    {ZSTD_c_ldmHashRateLog,   "ldmHashRateLog"},
+
+    {ZSTD_c_contentSizeFlag,  "contentSizeFlag"},
+    {ZSTD_c_checksumFlag,     "checksumFlag"},
+    {ZSTD_c_dictIDFlag,       "dictIDFlag"},
+
+    {ZSTD_c_nbWorkers,        "nbWorkers"},
+    {ZSTD_c_jobSize,          "jobSize"},
+    {ZSTD_c_overlapLog,       "overlapLog"}
+};
+
+static const ParameterInfo dp_list[] =
+{
+    {ZSTD_d_windowLogMax, "windowLogMax"}
+};
+
+void
+set_parameter_error(const _zstd_state* const state, int is_compress,
+                    int key_v, int value_v)
+{
+    ParameterInfo const *list;
+    int list_size;
+    char const *name;
+    char *type;
+    ZSTD_bounds bounds;
+    int i;
+    char pos_msg[128];
+
+    if (is_compress) {
+        list = cp_list;
+        list_size = Py_ARRAY_LENGTH(cp_list);
+        type = "compression";
+    } else {
+        list = dp_list;
+        list_size = Py_ARRAY_LENGTH(dp_list);
+        type = "decompression";
+    }
+
+    /* Find parameter's name */
+    name = NULL;
+    for (i = 0; i < list_size; i++) {
+        if (key_v == (list+i)->parameter) {
+            name = (list+i)->parameter_name;
+            break;
+        }
+    }
+
+    /* Unknown parameter */
+    if (name == NULL) {
+        PyOS_snprintf(pos_msg, sizeof(pos_msg),
+                      "unknown parameter (key %d)", key_v);
+        name = pos_msg;
+    }
+
+    /* Get parameter bounds */
+    if (is_compress) {
+        bounds = ZSTD_cParam_getBounds(key_v);
+    } else {
+        bounds = ZSTD_dParam_getBounds(key_v);
+    }
+    if (ZSTD_isError(bounds.error)) {
+        PyErr_Format(state->ZstdError,
+                     "Zstd %s parameter \"%s\" is invalid. (zstd v%s)",
+                     type, name, ZSTD_versionString());
+        return;
+    }
+
+    /* Error message */
+    PyErr_Format(state->ZstdError,
+                 "Error when setting zstd %s parameter \"%s\", it "
+                 "should %d <= value <= %d, provided value is %d. "
+                 "(zstd v%s, %d-bit build)",
+                 type, name,
+                 bounds.lowerBound, bounds.upperBound, value_v,
+                 ZSTD_versionString(), 8*(int)sizeof(Py_ssize_t));
+}
 
 /* -------------------------
      Train dictionary code
@@ -638,6 +739,25 @@ add_type_to_module(PyObject *module, const char *name,
     return 0;
 }
 
+static inline int
+add_constant_to_type(PyTypeObject *type, const char *name, const long value)
+{
+    PyObject *temp;
+
+    temp = PyLong_FromLong(value);
+    if (temp == NULL) {
+        return -1;
+    }
+
+    if (PyObject_SetAttrString((PyObject*) type, name, temp) < 0) {
+        Py_DECREF(temp);
+        return -1;
+    }
+    Py_DECREF(temp);
+
+    return 0;
+}
+
 static int _zstd_exec(PyObject *module) {
     STATE_FROM_MODULE(module);
 
@@ -690,7 +810,7 @@ static int _zstd_exec(PyObject *module) {
         return -1;
     }
 
-    /* // ZstdCompressor 
+    // ZstdCompressor 
     if (add_type_to_module(module,
                            "ZstdCompressor",
                            &zstdcompressor_type_spec,
@@ -716,7 +836,7 @@ static int _zstd_exec(PyObject *module) {
                              ZSTD_e_end) < 0) {
         return -1;
     }
-
+    /*
     // RichMemZstdCompressor
     if (add_type_to_module(module,
                            "RichMemZstdCompressor",
@@ -773,8 +893,8 @@ _zstd_traverse(PyObject *module, visitproc visit, void *arg)
     Py_VISIT(MS_MEMBER(str_flush));
 
     Py_VISIT(MS_MEMBER(ZstdDict_type));
-    /*Py_VISIT(MS_MEMBER(ZstdCompressor_type));
-    Py_VISIT(MS_MEMBER(RichMemZstdCompressor_type));
+    Py_VISIT(MS_MEMBER(ZstdCompressor_type));
+    /*Py_VISIT(MS_MEMBER(RichMemZstdCompressor_type));
     Py_VISIT(MS_MEMBER(ZstdDecompressor_type));
     Py_VISIT(MS_MEMBER(EndlessZstdDecompressor_type));
     Py_VISIT(MS_MEMBER(ZstdFileReader_type));
@@ -799,8 +919,8 @@ _zstd_clear(PyObject *module)
     Py_CLEAR(MS_MEMBER(str_flush));
 
     Py_CLEAR(MS_MEMBER(ZstdDict_type));
-    /*Py_CLEAR(MS_MEMBER(ZstdCompressor_type));
-    Py_CLEAR(MS_MEMBER(RichMemZstdCompressor_type));
+    Py_CLEAR(MS_MEMBER(ZstdCompressor_type));
+    /*Py_CLEAR(MS_MEMBER(RichMemZstdCompressor_type));
     Py_CLEAR(MS_MEMBER(ZstdDecompressor_type));
     Py_CLEAR(MS_MEMBER(EndlessZstdDecompressor_type));
     Py_CLEAR(MS_MEMBER(ZstdFileReader_type));
