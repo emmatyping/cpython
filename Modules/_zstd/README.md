@@ -17,9 +17,10 @@ TODOs:
 2. figure out minimum zstd version to support
 3. rewrite invoke_method_*_arg
 4. Pickle support?
-5. ~~Figure out what to do about mremap for the output buffer~~ I think it will just be conditional on `HAVE_MREMAP`
+5. ~~Figure out what to do about mremap for the output buffer~~ I think it will just be conditional on `HAVE_MREMAP`, but added after the initial code.
 6. for compress_stream, how to handle the defaults/why the size is under an assert
 7. Should we provide a `_zstd.compress(bytes)`?
 8. ^ or generally provide buffer protocol support?
 9. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-10. Is there a better way to handle `__new__` with clinic?
+10. ~~Is there a better way to handle `__new__` with clinic?~~ New is fine, `__init__` is a bit clunky
+11. What to do about parameter values?
