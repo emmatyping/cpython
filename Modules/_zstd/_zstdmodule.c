@@ -836,14 +836,6 @@ static int _zstd_exec(PyObject *module) {
                              ZSTD_e_end) < 0) {
         return -1;
     }
-    /*
-    // RichMemZstdCompressor
-    if (add_type_to_module(module,
-                           "RichMemZstdCompressor",
-                           &richmem_zstdcompressor_type_spec,
-                           &MS_MEMBER(RichMemZstdCompressor_type)) < 0) {
-        return -1;
-    }
 
     // ZstdDecompressor
     if (add_type_to_module(module,
@@ -861,22 +853,6 @@ static int _zstd_exec(PyObject *module) {
         return -1;
     }
 
-    // ZstdFileReader
-    if (add_type_to_module(module,
-                           "ZstdFileReader",
-                           &ZstdFileReader_type_spec,
-                           &MS_MEMBER(ZstdFileReader_type)) < 0) {
-        return -1;
-    }
-
-    // ZstdFileWriter
-    if (add_type_to_module(module,
-                           "ZstdFileWriter",
-                           &ZstdFileWriter_type_spec,
-                           &MS_MEMBER(ZstdFileWriter_type)) < 0) {
-        return -1;
-    }
-    */
     return 0;
 }
 
@@ -894,11 +870,10 @@ _zstd_traverse(PyObject *module, visitproc visit, void *arg)
 
     Py_VISIT(MS_MEMBER(ZstdDict_type));
     Py_VISIT(MS_MEMBER(ZstdCompressor_type));
-    /*Py_VISIT(MS_MEMBER(RichMemZstdCompressor_type));
+
     Py_VISIT(MS_MEMBER(ZstdDecompressor_type));
     Py_VISIT(MS_MEMBER(EndlessZstdDecompressor_type));
-    Py_VISIT(MS_MEMBER(ZstdFileReader_type));
-    Py_VISIT(MS_MEMBER(ZstdFileWriter_type));*/
+
     Py_VISIT(MS_MEMBER(ZstdError));
 
     Py_VISIT(MS_MEMBER(CParameter_type));
@@ -920,11 +895,10 @@ _zstd_clear(PyObject *module)
 
     Py_CLEAR(MS_MEMBER(ZstdDict_type));
     Py_CLEAR(MS_MEMBER(ZstdCompressor_type));
-    /*Py_CLEAR(MS_MEMBER(RichMemZstdCompressor_type));
+
     Py_CLEAR(MS_MEMBER(ZstdDecompressor_type));
     Py_CLEAR(MS_MEMBER(EndlessZstdDecompressor_type));
-    Py_CLEAR(MS_MEMBER(ZstdFileReader_type));
-    Py_CLEAR(MS_MEMBER(ZstdFileWriter_type));*/
+
     Py_CLEAR(MS_MEMBER(ZstdError));
 
     Py_CLEAR(MS_MEMBER(CParameter_type));

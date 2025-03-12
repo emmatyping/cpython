@@ -24,3 +24,5 @@ TODOs:
 9. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
 10. ~~Is there a better way to handle `__new__` with clinic?~~ New is fine, `__init__` is a bit clunky
 11. What to do about parameter values?
+12. Should `EndlessZstdDecompressor` be renamed?
+13. Go over class __init__/class docs to see if they should be refactored

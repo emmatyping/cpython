@@ -59,11 +59,8 @@ if (!PyThread_acquire_lock((obj)->lock, 0)) { \
 
 extern PyType_Spec zstddict_type_spec;
 extern PyType_Spec zstdcompressor_type_spec;
-/*extern PyType_Spec ZstdDecompressor_type_spec;
+extern PyType_Spec ZstdDecompressor_type_spec;
 extern PyType_Spec EndlessZstdDecompressor_type_spec;
-extern PyType_Spec ZstdFileReader_type_spec;
-extern PyType_Spec ZstdFileWriter_type_spec;
-*/
 
 struct _zstd_state {
     PyObject *empty_bytes;
@@ -75,11 +72,8 @@ struct _zstd_state {
 
     PyTypeObject *ZstdDict_type;
     PyTypeObject *ZstdCompressor_type;
-    /*PyTypeObject *RichMemZstdCompressor_type;
     PyTypeObject *ZstdDecompressor_type;
     PyTypeObject *EndlessZstdDecompressor_type;
-    PyTypeObject *ZstdFileReader_type;
-    PyTypeObject *ZstdFileWriter_type;*/
     PyObject *ZstdError;
 
     PyTypeObject *CParameter_type;

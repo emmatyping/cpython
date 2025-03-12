@@ -99,3 +99,14 @@ _OutputBuffer_OnError(_BlocksOutputBuffer *buffer)
 {
     Py_CLEAR(buffer->list);
 }
+
+/* Whether the output data has reached max_length.
+The avail_out must be 0, please check it before calling. */
+static inline int
+_OutputBuffer_ReachedMaxLength(_BlocksOutputBuffer *buffer, ZSTD_outBuffer *ob)
+{
+    /* Ensure (data size == allocated size) */
+    assert(ob->pos == ob->size);
+
+    return buffer->allocated == buffer->max_length;
+}

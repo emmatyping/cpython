@@ -9,8 +9,7 @@ preserve
 #include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 
 static PyObject *
-_zstd_ZstdCompressor_impl(PyTypeObject *type, PyObject *args,
-                          PyObject *kwargs);
+_zstd_ZstdCompressor_impl(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs));
 
 static PyObject *
 _zstd_ZstdCompressor(PyTypeObject *type, PyObject *args, PyObject *kwargs)
@@ -84,7 +83,7 @@ PyDoc_STRVAR(_zstd_ZstdCompressor___init____doc__,
 "  level\n"
 "    The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.\n"
 "  options\n"
-"    Advanced compression parameters.\n"
+"    A dict object that contains advanced compression parameters.\n"
 "  zstd_dict\n"
 "    A ZstdDict object, a pre-trained zstd dictionary.");
 
@@ -307,4 +306,4 @@ skip_optional:
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=c8f1e391d426819e input=a9049054013a1b77]*/
+/*[clinic end generated code: output=d718ddcc588d2c74 input=a9049054013a1b77]*/

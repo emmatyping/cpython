@@ -309,16 +309,15 @@ load:
 @classmethod
 _zstd.ZstdCompressor.__new__
 
-    args: object = NULL
+    args: object(unused=True) = NULL
     *
-    kwargs: object = NULL
+    kwargs: object(unused=True) = NULL
 
 [clinic start generated code]*/
 
 static PyObject *
-_zstd_ZstdCompressor_impl(PyTypeObject *type, PyObject *args,
-                          PyObject *kwargs)
-/*[clinic end generated code: output=b3840d8df536e705 input=feabb5d46013ec91]*/
+_zstd_ZstdCompressor_impl(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs))
+/*[clinic end generated code: output=879c93bffbe769f9 input=224cff98f7432794]*/
 {
     ZstdCompressor *self;
     self = (ZstdCompressor*)type->tp_alloc(type, 0);
@@ -385,7 +384,7 @@ _zstd.ZstdCompressor.__init__
     level: object(subclass_of='&PyLong_Type') = NULL
         The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
     options: object(subclass_of='&PyDict_Type') = NULL
-        Advanced compression parameters.
+        A dict object that contains advanced compression parameters.
     zstd_dict: object = NULL
         A ZstdDict object, a pre-trained zstd dictionary.
 
@@ -395,7 +394,7 @@ A streaming compressor. Thread-safe at method level.
 static int
 _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
                                    PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=215e6c4342732f96 input=b5a58bcdc3b66942]*/
+/*[clinic end generated code: output=215e6c4342732f96 input=7a4c07b83a2451ee]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -458,6 +457,7 @@ compress_impl(ZstdCompressor *self, Py_buffer *data,
         in.pos = 0;
     }
 
+    // TODO(emmatyping): Can we use InitWithSize here?
     if (rich_mem) {
         /* Calculate output buffer's size */
         size_t output_buffer_size = ZSTD_compressBound(in.size);
