@@ -554,6 +554,42 @@ success:
     return ret;
 }
 
+/*[clinic input]
+_zstd._set_parameter_types
+
+    c_parameter_type: object(subclass_of='&PyType_Type')
+        CParameter IntEnum type object
+    d_parameter_type: object(subclass_of='&PyType_Type')
+        DParameter IntEnum type object
+
+Internal function, set CParameter/DParameter types for validity check.
+[clinic start generated code]*/
+
+static PyObject *
+_zstd__set_parameter_types_impl(PyObject *module, PyObject *c_parameter_type,
+                                PyObject *d_parameter_type)
+/*[clinic end generated code: output=a13d4890ccbd2873 input=3e7d0d37c3a1045a]*/
+{
+    STATE_FROM_MODULE(module);
+
+    if (!PyType_Check(c_parameter_type) || !PyType_Check(d_parameter_type)) {
+        PyErr_SetString(PyExc_ValueError,
+                        "The two arguments should be CParameter and "
+                        "DParameter types.");
+        return NULL;
+    }
+
+    Py_XDECREF(MS_MEMBER(CParameter_type));
+    Py_INCREF(c_parameter_type);
+    MS_MEMBER(CParameter_type) = (PyTypeObject*)c_parameter_type;
+
+    Py_XDECREF(MS_MEMBER(DParameter_type));
+    Py_INCREF(d_parameter_type);
+    MS_MEMBER(DParameter_type) = (PyTypeObject*)d_parameter_type;
+
+    Py_RETURN_NONE;
+}
+
 
 static PyMethodDef _zstd_methods[] = {
     _ZSTD__TRAIN_DICT_METHODDEF
@@ -561,6 +597,7 @@ static PyMethodDef _zstd_methods[] = {
     _ZSTD__GET_PARAM_BOUNDS_METHODDEF
     _ZSTD__GET_FRAME_SIZE_METHODDEF
     _ZSTD__GET_FRAME_INFO_METHODDEF
+    _ZSTD__SET_PARAMETER_TYPES_METHODDEF
     {0}
 };
 
