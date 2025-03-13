@@ -169,10 +169,6 @@ static PyObject *
 _zstd_ZstdDict___reduce___impl(ZstdDict *self)
 /*[clinic end generated code: output=5c9b8a3550429417 input=2d69a2b4775ff76d]*/
 {
-    /* return Py_BuildValue("O(On)", Py_TYPE(self),
-                            self->dict_content,
-                            self->dict_id == 0);
-       v0.15.7 added .as_* attributes, pickle will cause more confusion. */
     PyErr_SetString(PyExc_TypeError,
                     "ZstdDict object intentionally doesn't support pickle. If you need "
                     "to save zstd dictionary to disk, please save .dict_content "
