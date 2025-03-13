@@ -301,23 +301,12 @@ _zstd__finalize_dict_impl(PyObject *module, PyBytesObject *custom_dict_bytes,
                           int compression_level)
 /*[clinic end generated code: output=9c2a7d8c845cee93 input=0904bda11cdb062f]*/
 {
-// TODO: should this be removed and bump minimum to 1.4.5?
-#if ZSTD_VERSION_NUMBER < 10405
-    PyErr_Format(PyExc_NotImplementedError,
-                 "_finalize_dict function only available when the underlying "
-                 "zstd library's version is greater than or equal to v1.4.5. "
-                 "At _zstd module's compile-time, zstd version < v1.4.5. At "
-                 "_zstd module's run-time, zstd version is v%s.",
-                 ZSTD_versionString());
-    return NULL;
-#else
     if (ZSTD_versionNumber() < 10405) {
         /* Must be dynamically linked */
         PyErr_Format(PyExc_NotImplementedError,
-                "_finalize_dict function only available when the underlying "
+                "The _finalize_dict function is only available when the underlying "
                 "zstd library's version is greater than or equal to v1.4.5. "
-                "At _zstd module's compile-time, zstd version >= v1.4.5. At "
-                "_zstd module's run-time, zstd version is v%s.",
+                "The current zstd version is v%s.",
                 ZSTD_versionString());
         return NULL;
     }
@@ -413,7 +402,6 @@ error:
 success:
     PyMem_Free(chunk_sizes);
     return dst_dict_bytes;
-#endif
 }
 
 

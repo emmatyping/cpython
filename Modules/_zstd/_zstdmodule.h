@@ -14,9 +14,8 @@ Refactored for the CPython standard library by Emma Harper Smith.
 #include "zstd.h"
 #include "zdict.h"
 
-// TODO(emmatyping): should we put a different policy on minimum supported libzstd?
-#if ZSTD_VERSION_NUMBER < 10400
-    #error "_zstd module requires zstd v1.4.0+"
+#if ZSTD_VERSION_NUMBER < 10405
+    #error "_zstd module requires zstd v1.4.5+"
 #endif
 
 /* Forward declaration of module state */
