@@ -20,6 +20,8 @@ class _zstd.ZstdDict "PyObject *" "clinic_state()->ZstdDict_type"
 
 #include "_zstdmodule.h"
 
+#include <stddef.h>               // offsetof()
+
 /* -----------------
      ZstdDict code
    ----------------- */

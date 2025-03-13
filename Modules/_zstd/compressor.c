@@ -20,7 +20,10 @@ class _zstd.ZstdCompressor "PyObject *" "clinic_state()->ZstdCompressor_type"
 #endif
 
 #include "_zstdmodule.h"
+
 #include "buffer.h"
+
+#include <stddef.h>               // offsetof()
 
 /* -----------------------
     ZstdCompressor code
