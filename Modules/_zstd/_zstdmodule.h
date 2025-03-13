@@ -174,6 +174,11 @@ typedef struct {
 } ZstdDecompressor;
 
 typedef enum {
+    TYPE_DECOMPRESSOR,          // <D>, ZstdDecompressor class
+    TYPE_ENDLESS_DECOMPRESSOR,  // <E>, EndlessZstdDecompressor class
+} decompress_type;
+
+typedef enum {
     ERR_DECOMPRESS,
     ERR_COMPRESS,
     ERR_SET_PLEDGED_INPUT_SIZE,
@@ -222,3 +227,13 @@ _PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options);
 
 extern int
 _PyZstd_set_d_parameters(ZstdDecompressor *self, PyObject *options);
+
+extern PyObject *
+decompress_impl(ZstdDecompressor *self, ZSTD_inBuffer *in,
+                const Py_ssize_t max_length,
+                const Py_ssize_t initial_size,
+                const decompress_type type);
+
+extern PyObject *
+compress_impl(ZstdCompressor *self, Py_buffer *data,
+                const ZSTD_EndDirective end_directive);

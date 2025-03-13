@@ -1234,6 +1234,180 @@ success:
     return ret;
 }
 
+/*[clinic input]
+_zstd.compress
+
+    data: Py_buffer
+        A bytes-like object, data to be compressed.
+    level: object(subclass_of='&PyLong_Type') = NULL
+        The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
+    options: object(subclass_of='&PyDict_Type') = NULL
+        A dict object that contains advanced compression parameters.
+    zstd_dict: object = NULL
+        A ZstdDict object, a pre-trained zstd dictionary.
+
+Compress data, return a bytes object of zstd compressed data.
+[clinic start generated code]*/
+
+static PyObject *
+_zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
+                    PyObject *options, PyObject *zstd_dict)
+/*[clinic end generated code: output=0cca9399ca5c95cc input=5e98b2e29c77c3aa]*/
+{
+    STATE_FROM_MODULE(module);
+    PyObject *ret = NULL;
+    ZstdCompressor self = {0};
+
+    /* Initialize & set ZstdCompressor */
+    self.cctx = ZSTD_createCCtx();
+    if (self.cctx == NULL) {
+        PyErr_SetString(MS_MEMBER(ZstdError),
+                        "Unable to create ZSTD_CCtx instance.");
+        goto error;
+    }
+
+    self.module_state = MODULE_STATE;
+
+    if (level != NULL && options != NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Only one of level or options should be used.");
+        goto error;
+    }
+
+    /* Set compressLevel/options to compression context */
+    if (level != NULL) {
+        if (_PyZstd_set_c_parameters(&self, level) < 0) {
+            goto error;
+        }
+    }
+
+    if (options != NULL) {
+        if (_PyZstd_set_c_parameters(&self, options) < 0) {
+            goto error;
+        }
+    }
+
+    /* Load dictionary to compression context */
+    if (zstd_dict != NULL) {
+        if (_PyZstd_load_c_dict(&self, zstd_dict) < 0) {
+            goto error;
+        }
+        self.dict = zstd_dict;
+    }
+
+    ret = compress_impl(&self, data, ZSTD_e_end);
+    if (ret == NULL) {
+        goto error;
+    } else {
+        goto success;
+    }
+error:
+    Py_CLEAR(ret);
+success:
+    /* Free decompression context */
+    ZSTD_freeCCtx(self.cctx);
+    return ret;
+}
+
+/*[clinic input]
+_zstd.decompress
+
+    data: Py_buffer
+        A bytes-like object, zstd data to be decompressed.
+    zstd_dict: object = NULL
+        A ZstdDict object, a pre-trained zstd dictionary.
+    options: object(subclass_of='&PyDict_Type') = NULL
+        A dict object that contains advanced decompression parameters.
+
+Decompress zstd data, return a bytes object.
+
+Supports multiple concatenated frames.
+[clinic start generated code]*/
+
+static PyObject *
+_zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *zstd_dict,
+                      PyObject *options)
+/*[clinic end generated code: output=2e8423588fb3b178 input=6203075d1ad1dc47]*/
+{
+    uint64_t decompressed_size;
+    Py_ssize_t initial_size;
+    ZstdDecompressor self = {0};
+    ZSTD_inBuffer in;
+    STATE_FROM_MODULE(module);
+    PyObject *ret = NULL;
+
+    /* Initialize & set ZstdDecompressor */
+    self.dctx = ZSTD_createDCtx();
+    if (self.dctx == NULL) {
+        PyErr_SetString(MS_MEMBER(ZstdError),
+                        "Unable to create ZSTD_DCtx instance.");
+        goto error;
+    }
+    self.at_frame_edge = 1;
+
+    self.module_state = MODULE_STATE;
+
+    /* Load dictionary to decompression context */
+    if (zstd_dict != NULL) {
+        if (_PyZstd_load_d_dict(&self, zstd_dict) < 0) {
+            goto error;
+        }
+    }
+
+    /* Set option to decompression context */
+    if (options != NULL) {
+        if (_PyZstd_set_d_parameters(&self, options) < 0) {
+            goto error;
+        }
+    }
+
+    /* Prepare input data */
+    in.src = data->buf;
+    in.size = data->len;
+    in.pos = 0;
+
+    /* Get decompressed size */
+    decompressed_size = ZSTD_getFrameContentSize(data->buf, data->len);
+    /* These two zstd constants always > PY_SSIZE_T_MAX:
+            ZSTD_CONTENTSIZE_UNKNOWN is (0ULL - 1)
+            ZSTD_CONTENTSIZE_ERROR   is (0ULL - 2) */
+    if (decompressed_size <= (uint64_t) PY_SSIZE_T_MAX) {
+        initial_size = (Py_ssize_t) decompressed_size;
+    } else {
+        initial_size = -1;
+    }
+
+    /* Decompress */
+    ret = decompress_impl(&self, &in, -1, initial_size,
+                            TYPE_ENDLESS_DECOMPRESSOR);
+    if (ret == NULL) {
+        goto error;
+    }
+
+    /* Check data integrity. at_frame_edge flag is 1 when both the input and
+        output streams are at a frame edge. */
+    if (self.at_frame_edge == 0) {
+        char *extra_msg = (Py_SIZE(ret) == 0) ? "." :
+                            ", if want to output these decompressed data, use "
+                            "decompress_stream function or "
+                            "EndlessZstdDecompressor class to decompress.";
+        PyErr_Format(MS_MEMBER(ZstdError),
+                        "Decompression failed: zstd data ends in an incomplete "
+                        "frame, maybe the input data was truncated. Decompressed "
+                        "data is %zd bytes%s",
+                        Py_SIZE(ret), extra_msg);
+        goto error;
+    }
+
+    goto success;
+
+error:
+    Py_CLEAR(ret);
+success:
+    /* Free decompression context */
+    ZSTD_freeDCtx(self.dctx);
+    return ret;
+}
+
 static PyMethodDef _zstd_methods[] = {
     _ZSTD__TRAIN_DICT_METHODDEF
     _ZSTD__FINALIZE_DICT_METHODDEF
@@ -1243,6 +1417,8 @@ static PyMethodDef _zstd_methods[] = {
     _ZSTD__SET_PARAMETER_TYPES_METHODDEF
     _ZSTD_COMPRESS_STREAM_METHODDEF
     _ZSTD_DECOMPRESS_STREAM_METHODDEF
+    _ZSTD_COMPRESS_METHODDEF
+    _ZSTD_DECOMPRESS_METHODDEF
 
     {0}
 };
