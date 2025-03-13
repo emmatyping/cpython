@@ -10,9 +10,9 @@ Refactored for the CPython standard library by Emma Harper Smith.
 
 /*[clinic input]
 module _zstd
-class _zstd.ZstdCompressor "PyObject *" "clinic_state()->ZstdCompressor_type"
+class _zstd.ZstdCompressor "ZstdCompressor *" "clinic_state()->ZstdCompressor_type"
 [clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=db4bf6c9a06d7565]*/
+/*[clinic end generated code: output=da39a3ee5e6b4b0d input=875bf614798f80cb]*/
 
 
 #ifndef Py_BUILD_CORE_BUILTIN
@@ -383,7 +383,6 @@ ZstdCompressor_dealloc(ZstdCompressor *self)
 /*[clinic input]
 _zstd.ZstdCompressor.__init__
 
-    self: self(type="ZstdCompressor *")
     level: object(subclass_of='&PyLong_Type') = NULL
         The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
     options: object(subclass_of='&PyDict_Type') = NULL
@@ -397,7 +396,7 @@ A streaming compressor. Thread-safe at method level.
 static int
 _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
                                    PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=215e6c4342732f96 input=7a4c07b83a2451ee]*/
+/*[clinic end generated code: output=215e6c4342732f96 input=934e46a9be560860]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -570,7 +569,6 @@ error:
 /*[clinic input]
 _zstd.ZstdCompressor.compress
 
-    self: self(type="ZstdCompressor *")
     data: Py_buffer
     mode: int(c_default="ZSTD_e_continue") = ZstdCompressor.CONTINUE
         Can be these 3 values ZstdCompressor.CONTINUE,
@@ -585,7 +583,7 @@ Return a chunk of compressed data if possible, or b'' otherwise.
 static PyObject *
 _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
                                    int mode)
-/*[clinic end generated code: output=ed7982d1cf7b4f98 input=191b3c0143333c69]*/
+/*[clinic end generated code: output=ed7982d1cf7b4f98 input=4828e1899e31a4b8]*/
 {
     PyObject *ret;
 
@@ -627,7 +625,6 @@ _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
 /*[clinic input]
 _zstd.ZstdCompressor.flush
 
-    self: self(type="ZstdCompressor *")
     mode: int(c_default="ZSTD_e_end") = ZstdCompressor.FLUSH_FRAME
         Can be these 2 values ZstdCompressor.FLUSH_FRAME,
         ZstdCompressor.FLUSH_BLOCK
@@ -641,7 +638,7 @@ object can still be used after this method is called.
 
 static PyObject *
 _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
-/*[clinic end generated code: output=b7cf2c8d64dcf2e3 input=9677d826776596cb]*/
+/*[clinic end generated code: output=b7cf2c8d64dcf2e3 input=44cc095b5ebd1c10]*/
 {
     PyObject *ret;
 
@@ -674,7 +671,6 @@ _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
 /*[clinic input]
 _zstd.ZstdCompressor._set_pledged_input_size
 
-    self: self(type="ZstdCompressor *")
     size: object(subclass_of="&PyLong_Type") = NULL
         Uncompressed content size of a frame, None means "unknown size".
     /
@@ -695,7 +691,7 @@ frame header.
 static PyObject *
 _zstd_ZstdCompressor__set_pledged_input_size_impl(ZstdCompressor *self,
                                                   PyObject *size)
-/*[clinic end generated code: output=2d4bbed8d4e569f5 input=44539c627b619d45]*/
+/*[clinic end generated code: output=2d4bbed8d4e569f5 input=cd419a9321502c2c]*/
 {
     uint64_t pledged_size;
     size_t zstd_ret;

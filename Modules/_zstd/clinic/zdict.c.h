@@ -159,12 +159,12 @@ PyDoc_STRVAR(_zstd_ZstdDict___reduce____doc__,
     {"__reduce__", (PyCFunction)_zstd_ZstdDict___reduce__, METH_NOARGS, _zstd_ZstdDict___reduce____doc__},
 
 static PyObject *
-_zstd_ZstdDict___reduce___impl(PyObject *self);
+_zstd_ZstdDict___reduce___impl(ZstdDict *self);
 
 static PyObject *
 _zstd_ZstdDict___reduce__(PyObject *self, PyObject *Py_UNUSED(ignored))
 {
-    return _zstd_ZstdDict___reduce___impl(self);
+    return _zstd_ZstdDict___reduce___impl((ZstdDict *)self);
 }
 
 PyDoc_STRVAR(_zstd_ZstdDict_as_digested_dict__doc__,
@@ -193,7 +193,7 @@ PyDoc_STRVAR(_zstd_ZstdDict_as_digested_dict__doc__,
 #endif
 
 static PyObject *
-_zstd_ZstdDict_as_digested_dict_get_impl(PyObject *self);
+_zstd_ZstdDict_as_digested_dict_get_impl(ZstdDict *self);
 
 static PyObject *
 _zstd_ZstdDict_as_digested_dict_get(PyObject *self, void *Py_UNUSED(context))
@@ -201,7 +201,7 @@ _zstd_ZstdDict_as_digested_dict_get(PyObject *self, void *Py_UNUSED(context))
     PyObject *return_value = NULL;
 
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _zstd_ZstdDict_as_digested_dict_get_impl(self);
+    return_value = _zstd_ZstdDict_as_digested_dict_get_impl((ZstdDict *)self);
     Py_END_CRITICAL_SECTION();
 
     return return_value;
@@ -231,7 +231,7 @@ PyDoc_STRVAR(_zstd_ZstdDict_as_undigested_dict__doc__,
 #endif
 
 static PyObject *
-_zstd_ZstdDict_as_undigested_dict_get_impl(PyObject *self);
+_zstd_ZstdDict_as_undigested_dict_get_impl(ZstdDict *self);
 
 static PyObject *
 _zstd_ZstdDict_as_undigested_dict_get(PyObject *self, void *Py_UNUSED(context))
@@ -239,7 +239,7 @@ _zstd_ZstdDict_as_undigested_dict_get(PyObject *self, void *Py_UNUSED(context))
     PyObject *return_value = NULL;
 
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _zstd_ZstdDict_as_undigested_dict_get_impl(self);
+    return_value = _zstd_ZstdDict_as_undigested_dict_get_impl((ZstdDict *)self);
     Py_END_CRITICAL_SECTION();
 
     return return_value;
@@ -269,7 +269,7 @@ PyDoc_STRVAR(_zstd_ZstdDict_as_prefix__doc__,
 #endif
 
 static PyObject *
-_zstd_ZstdDict_as_prefix_get_impl(PyObject *self);
+_zstd_ZstdDict_as_prefix_get_impl(ZstdDict *self);
 
 static PyObject *
 _zstd_ZstdDict_as_prefix_get(PyObject *self, void *Py_UNUSED(context))
@@ -277,9 +277,9 @@ _zstd_ZstdDict_as_prefix_get(PyObject *self, void *Py_UNUSED(context))
     PyObject *return_value = NULL;
 
     Py_BEGIN_CRITICAL_SECTION(self);
-    return_value = _zstd_ZstdDict_as_prefix_get_impl(self);
+    return_value = _zstd_ZstdDict_as_prefix_get_impl((ZstdDict *)self);
     Py_END_CRITICAL_SECTION();
 
     return return_value;
 }
-/*[clinic end generated code: output=c5e2d0904f762294 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=66e2ed32c385646e input=a9049054013a1b77]*/
