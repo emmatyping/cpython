@@ -10,6 +10,7 @@ This module is based on the `pyzstd` project.
 4. Removed forced inlining/no inlining
 5. replaced the inclusion of other .c files in `_zstd.c` with the creation of multiple object files to be linked in to `_zstd.c`. This should make compilation faster and the code easier to understand.
 6. "RichMem" is used by default, which boils down to calculating the output buffer size up-front.
+7. The ZSTD_c_targetCBlockSize parameter is omitted as the minimum zstd version is not yet v1.5.6
 
 
 TODOs:
@@ -29,3 +30,4 @@ TODOs:
 14. Go through any compile time zstd verison checks and see if they need to moved into runtime checks
 15. TODOs in the code base
 16. Should ZstdCompressor.compress() take an initial size argument?
+17. Compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE

@@ -91,11 +91,6 @@ static const ParameterInfo cp_list[] =
     {ZSTD_c_targetLength,     "targetLength"},
     {ZSTD_c_strategy,         "strategy"},
 
-// TODO(emmatyping): Should this be decided at runtime or left out?
-#if ZSTD_VERSION_NUMBER >= 10506
-    {ZSTD_c_targetCBlockSize, "targetCBlockSize"},
-#endif
-
     {ZSTD_c_enableLongDistanceMatching, "enableLongDistanceMatching"},
     {ZSTD_c_ldmHashLog,       "ldmHashLog"},
     {ZSTD_c_ldmMinMatch,      "ldmMinMatch"},
@@ -626,9 +621,6 @@ add_parameters(PyObject *module)
     ADD_INT_PREFIX_MACRO(module, ZSTD_c_minMatch);
     ADD_INT_PREFIX_MACRO(module, ZSTD_c_targetLength);
     ADD_INT_PREFIX_MACRO(module, ZSTD_c_strategy);
-#if ZSTD_VERSION_NUMBER >= 10506
-    ADD_INT_PREFIX_MACRO(module, ZSTD_c_targetCBlockSize);
-#endif
 
     ADD_INT_PREFIX_MACRO(module, ZSTD_c_enableLongDistanceMatching);
     ADD_INT_PREFIX_MACRO(module, ZSTD_c_ldmHashLog);
