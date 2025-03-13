@@ -29,49 +29,6 @@ class _zstd.EndlessZstdDecompressor "ZstdDecompressor *" "clinic_state()->Endles
      Decompress implementation
    ----------------------------- */
 
-typedef struct {
-    PyObject_HEAD
-
-    /* Thread lock for compressing */
-    PyThread_type_lock lock;
-
-    /* Decompression context */
-    ZSTD_DCtx *dctx;
-
-    /* ZstdDict object in use */
-    PyObject *dict;
-
-    /* Unconsumed input data */
-    char *input_buffer;
-    size_t input_buffer_size;
-    size_t in_begin, in_end;
-
-    /* Unused data */
-    PyObject *unused_data;
-
-    /* 0 if decompressor has (or may has) unconsumed input data, 0 or 1. */
-    char needs_input;
-
-    /* For EndlessZstdDecompressor, 0 or 1.
-       1 when both input and output streams are at a frame edge, means a
-       frame is completely decoded and fully flushed, or the decompressor
-       just be initialized. */
-    char at_frame_edge;
-
-    /* For ZstdDecompressor, 0 or 1.
-       1 means the end of the first frame has been reached. */
-    char eof;
-
-    /* Used for fast reset above three variables */
-    char _unused_char_for_align;
-
-    /* __init__ has been called, 0 or 1. */
-    int inited;
-
-    _zstd_state *module_state;
-
-} ZstdDecompressor;
-
 static inline ZSTD_DDict *
 _get_DDict(ZstdDict *self)
 {
@@ -106,8 +63,8 @@ _get_DDict(ZstdDict *self)
 }
 
 /* Set decompression parameters to decompression context */
-static int
-set_d_parameters(ZstdDecompressor *self, PyObject *options)
+int
+_PyZstd_set_d_parameters(ZstdDecompressor *self, PyObject *options)
 {
     size_t zstd_ret;
     PyObject *key, *value;
@@ -158,8 +115,8 @@ set_d_parameters(ZstdDecompressor *self, PyObject *options)
 }
 
 /* Load dictionary or prefix to decompression context */
-static int
-load_d_dict(ZstdDecompressor *self, PyObject *dict)
+int
+_PyZstd_load_d_dict(ZstdDecompressor *self, PyObject *dict)
 {
     size_t zstd_ret;
     STATE_FROM_OBJ(self);
@@ -732,7 +689,7 @@ _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
 
     /* Load dictionary to decompression context */
     if (zstd_dict != NULL) {
-        if (load_d_dict(self, zstd_dict) < 0) {
+        if (_PyZstd_load_d_dict(self, zstd_dict) < 0) {
             return -1;
         }
 
@@ -743,7 +700,7 @@ _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
 
     /* Set option to decompression context */
     if (options != NULL) {
-        if (set_d_parameters(self, options) < 0) {
+        if (_PyZstd_set_d_parameters(self, options) < 0) {
             return -1;
         }
     }
