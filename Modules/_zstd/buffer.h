@@ -31,7 +31,7 @@ _OutputBuffer_InitAndGrow(_BlocksOutputBuffer *buffer, ZSTD_outBuffer *ob,
     } else {
         block_size = BUFFER_BLOCK_SIZE[0];
     }
-    // TODO: verify maximum size is not greater than 128KB
+
     Py_ssize_t res = _BlocksOutputBuffer_InitAndGrow(buffer, block_size, &ob->dst);
     if (res < 0) {
         return -1;
@@ -61,7 +61,7 @@ _OutputBuffer_InitWithSize(_BlocksOutputBuffer *buffer, ZSTD_outBuffer *ob,
     } else {
         block_size = init_size;
     }
-    // TODO: verify maximum size is not greater than 128KB
+
     Py_ssize_t res = _BlocksOutputBuffer_InitWithSize(buffer, block_size, &ob->dst);
     if (res < 0) {
         return -1;
