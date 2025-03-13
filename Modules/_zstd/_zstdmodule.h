@@ -103,6 +103,76 @@ typedef struct {
     _zstd_state *module_state;
 } ZstdDict;
 
+typedef struct {
+    PyObject_HEAD
+
+    /* Thread lock for compressing */
+    PyThread_type_lock lock;
+
+    /* Compression context */
+    ZSTD_CCtx *cctx;
+
+    /* ZstdDict object in use */
+    PyObject *dict;
+
+    /* Last mode, initialized to ZSTD_e_end */
+    int last_mode;
+
+    /* (nbWorker >= 1) ? 1 : 0 */
+    int use_multithread;
+
+    /* Compression level */
+    int compression_level;
+
+    /* __init__ has been called, 0 or 1. */
+    int inited;
+
+    _zstd_state *module_state;
+} ZstdCompressor;
+
+typedef struct {
+    PyObject_HEAD
+
+    /* Thread lock for compressing */
+    PyThread_type_lock lock;
+
+    /* Decompression context */
+    ZSTD_DCtx *dctx;
+
+    /* ZstdDict object in use */
+    PyObject *dict;
+
+    /* Unconsumed input data */
+    char *input_buffer;
+    size_t input_buffer_size;
+    size_t in_begin, in_end;
+
+    /* Unused data */
+    PyObject *unused_data;
+
+    /* 0 if decompressor has (or may has) unconsumed input data, 0 or 1. */
+    char needs_input;
+
+    /* For EndlessZstdDecompressor, 0 or 1.
+       1 when both input and output streams are at a frame edge, means a
+       frame is completely decoded and fully flushed, or the decompressor
+       just be initialized. */
+    char at_frame_edge;
+
+    /* For ZstdDecompressor, 0 or 1.
+       1 means the end of the first frame has been reached. */
+    char eof;
+
+    /* Used for fast reset above three variables */
+    char _unused_char_for_align;
+
+    /* __init__ has been called, 0 or 1. */
+    int inited;
+
+    _zstd_state *module_state;
+
+} ZstdDecompressor;
+
 typedef enum {
     ERR_DECOMPRESS,
     ERR_COMPRESS,
@@ -125,6 +195,11 @@ typedef enum {
     DICT_TYPE_PREFIX = 2
 } dictionary_type;
 
+static inline int
+mt_continue_should_break(ZSTD_inBuffer *in, ZSTD_outBuffer *out) {
+    return in->size == in->pos && out->size != out->pos;
+}
+
 /* Format error message and set ZstdError. */
 extern void
 set_zstd_error(const _zstd_state* const state,
@@ -135,3 +210,15 @@ set_parameter_error(const _zstd_state* const state, int is_compress,
                     int key_v, int value_v);
 
 static const char init_twice_msg[] = "__init__ method is called twice.";
+
+extern int
+_PyZstd_load_c_dict(ZstdCompressor *self, PyObject *dict);
+
+extern int
+_PyZstd_load_d_dict(ZstdDecompressor *self, PyObject *dict);
+
+extern int
+_PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options);
+
+extern int
+_PyZstd_set_d_parameters(ZstdDecompressor *self, PyObject *options);

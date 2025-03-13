@@ -29,36 +29,9 @@ class _zstd.ZstdCompressor "ZstdCompressor *" "clinic_state()->ZstdCompressor_ty
     ZstdCompressor code
 ----------------------- */
 
-typedef struct {
-    PyObject_HEAD
 
-    /* Thread lock for compressing */
-    PyThread_type_lock lock;
-
-    /* Compression context */
-    ZSTD_CCtx *cctx;
-
-    /* ZstdDict object in use */
-    PyObject *dict;
-
-    /* Last mode, initialized to ZSTD_e_end */
-    int last_mode;
-
-    /* (nbWorker >= 1) ? 1 : 0 */
-    int use_multithread;
-
-    /* Compression level */
-    int compression_level;
-
-    /* __init__ has been called, 0 or 1. */
-    int inited;
-
-    _zstd_state *module_state;
-} ZstdCompressor;
-
-
-static int
-set_c_parameters(ZstdCompressor *self, PyObject *level_or_options)
+int
+_PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options)
 {
     size_t zstd_ret;
     _zstd_state* const _module_state = self->module_state; \
@@ -219,8 +192,8 @@ success:
     return cdict;
 }
 
-static int
-load_c_dict(ZstdCompressor *self, PyObject *dict) {
+int
+_PyZstd_load_c_dict(ZstdCompressor *self, PyObject *dict) {
 
     size_t zstd_ret;
     _zstd_state* const _module_state = self->module_state; \
@@ -411,20 +384,20 @@ _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
 
     /* Set compressLevel/options to compression context */
     if (level != NULL) {
-        if (set_c_parameters(self, level) < 0) {
+        if (_PyZstd_set_c_parameters(self, level) < 0) {
             return -1;
         }
     }
 
     if (options != NULL) {
-        if (set_c_parameters(self, options) < 0) {
+        if (_PyZstd_set_c_parameters(self, options) < 0) {
             return -1;
         }
     }
 
     /* Load dictionary to compression context */
     if (zstd_dict != NULL) {
-        if (load_c_dict(self, zstd_dict) < 0) {
+        if (_PyZstd_load_c_dict(self, zstd_dict) < 0) {
             return -1;
         }
 
@@ -548,7 +521,7 @@ compress_mt_continue_impl(ZstdCompressor *self, Py_buffer *data)
             }
         } else if (in.pos == in.size) {
             /* Finished */
-            assert(mt_continue_should_break(&in, &out));
+            assert(_PyZstd_mt_continue_should_break(&in, &out));
             break;
         }
     }
