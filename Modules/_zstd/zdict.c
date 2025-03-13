@@ -10,9 +10,9 @@ Refactored for the CPython standard library by Emma Harper Smith.
 
 /*[clinic input]
 module _zstd
-class _zstd.ZstdDict "PyObject *" "clinic_state()->ZstdDict_type"
+class _zstd.ZstdDict "ZstdDict *" "clinic_state()->ZstdDict_type"
 [clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=4512bf4797fd0f46]*/
+/*[clinic end generated code: output=da39a3ee5e6b4b0d input=a5d1254c497e52ba]*/
 
 #ifndef Py_BUILD_CORE_BUILTIN
 #  define Py_BUILD_CORE_MODULE 1
@@ -98,7 +98,6 @@ ZstdDict_dealloc(ZstdDict *self)
 /*[clinic input]
 _zstd.ZstdDict.__init__
 
-    self: self(type="ZstdDict *")
     dict_content: object
         A bytes-like object, dictionary's content.
     is_raw: bool = False
@@ -114,7 +113,7 @@ Initialize a ZstdDict object.
 static int
 _zstd_ZstdDict___init___impl(ZstdDict *self, PyObject *dict_content,
                              int is_raw)
-/*[clinic end generated code: output=c5f5a0d8377d037c input=1b4fba2f7acac768]*/
+/*[clinic end generated code: output=c5f5a0d8377d037c input=64c0388f7f130398]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -167,8 +166,8 @@ Intentionally not supporting pickle.
 [clinic start generated code]*/
 
 static PyObject *
-_zstd_ZstdDict___reduce___impl(PyObject *self)
-/*[clinic end generated code: output=e20d2153a89fd03c input=2d69a2b4775ff76d]*/
+_zstd_ZstdDict___reduce___impl(ZstdDict *self)
+/*[clinic end generated code: output=5c9b8a3550429417 input=2d69a2b4775ff76d]*/
 {
     /* return Py_BuildValue("O(On)", Py_TYPE(self),
                             self->dict_content,
@@ -237,8 +236,8 @@ Pass this attribute as zstd_dict argument: compress(dat, zstd_dict=zd.as_digeste
 [clinic start generated code]*/
 
 static PyObject *
-_zstd_ZstdDict_as_digested_dict_get_impl(PyObject *self)
-/*[clinic end generated code: output=eb7396856b57498f input=585448c79f31f74a]*/
+_zstd_ZstdDict_as_digested_dict_get_impl(ZstdDict *self)
+/*[clinic end generated code: output=09b086e7a7320dbb input=585448c79f31f74a]*/
 {
     return Py_BuildValue("Oi", self, DICT_TYPE_DIGESTED);
 }
@@ -258,8 +257,8 @@ Pass this attribute as zstd_dict argument: compress(dat, zstd_dict=zd.as_undiges
 [clinic start generated code]*/
 
 static PyObject *
-_zstd_ZstdDict_as_undigested_dict_get_impl(PyObject *self)
-/*[clinic end generated code: output=9ae901a7b3ad1aad input=022b0829ffb1c220]*/
+_zstd_ZstdDict_as_undigested_dict_get_impl(ZstdDict *self)
+/*[clinic end generated code: output=43c7a989e6d4253a input=022b0829ffb1c220]*/
 {
     return Py_BuildValue("Oi", self, DICT_TYPE_UNDIGESTED);
 }
@@ -279,8 +278,8 @@ Pass this attribute as zstd_dict argument: compress(dat, zstd_dict=zd.as_prefix)
 [clinic start generated code]*/
 
 static PyObject *
-_zstd_ZstdDict_as_prefix_get_impl(PyObject *self)
-/*[clinic end generated code: output=d460d8be7450cae8 input=09fb82a6a5407e87]*/
+_zstd_ZstdDict_as_prefix_get_impl(ZstdDict *self)
+/*[clinic end generated code: output=6f7130c356595a16 input=09fb82a6a5407e87]*/
 {
     return Py_BuildValue("Oi", self, DICT_TYPE_PREFIX);
 }
