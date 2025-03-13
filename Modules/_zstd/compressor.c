@@ -438,7 +438,7 @@ _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
 
 PyObject *
 compress_impl(ZstdCompressor *self, Py_buffer *data,
-                const ZSTD_EndDirective end_directive, const int rich_mem)
+                const ZSTD_EndDirective end_directive)
 {
     ZSTD_inBuffer in;
     ZSTD_outBuffer out;
@@ -457,24 +457,18 @@ compress_impl(ZstdCompressor *self, Py_buffer *data,
         in.pos = 0;
     }
 
-    // TODO(emmatyping): Can we use InitWithSize here?
-    if (rich_mem) {
-        /* Calculate output buffer's size */
-        size_t output_buffer_size = ZSTD_compressBound(in.size);
-        if (output_buffer_size > (size_t) PY_SSIZE_T_MAX) {
-            PyErr_NoMemory();
-            goto error;
-        }
-
-        if (_OutputBuffer_InitWithSize(&buffer, &out, -1,
-                                        (Py_ssize_t) output_buffer_size) < 0) {
-            goto error;
-        }
-    } else {
-        if (_OutputBuffer_InitAndGrow(&buffer, &out, -1) < 0) {
-            goto error;
-        }
+    /* Calculate output buffer's size */
+    size_t output_buffer_size = ZSTD_compressBound(in.size);
+    if (output_buffer_size > (size_t) PY_SSIZE_T_MAX) {
+        PyErr_NoMemory();
+        goto error;
     }
+
+    if (_OutputBuffer_InitWithSize(&buffer, &out, -1,
+                                    (Py_ssize_t) output_buffer_size) < 0) {
+        goto error;
+    }
+
 
     /* zstd stream compress */
     while (1) {
@@ -611,7 +605,7 @@ _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
     if (self->use_multithread && mode == ZSTD_e_continue) {
         ret = compress_mt_continue_impl(self, data);
     } else {
-        ret = compress_impl(self, data, mode, 0);
+        ret = compress_impl(self, data, mode);
     }
 
     if (ret) {
@@ -659,7 +653,7 @@ _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
 
     /* Thread-safe code */
     ACQUIRE_LOCK(self);
-    ret = compress_impl(self, NULL, mode, 0);
+    ret = compress_impl(self, NULL, mode);
 
     if (ret) {
         self->last_mode = mode;
