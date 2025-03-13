@@ -20,7 +20,10 @@ class _zstd.EndlessZstdDecompressor "ZstdDecompressor *" "clinic_state()->Endles
 #endif
 
 #include "_zstdmodule.h"
+
 #include "buffer.h"
+
+#include <stddef.h>               // offsetof()
 
 /* -----------------------------
      Decompress implementation
