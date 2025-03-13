@@ -68,7 +68,6 @@ set_c_parameters(ZstdCompressor *self, PyObject *level_or_options)
     if (PyLong_Check(level_or_options)) {
         const int level = PyLong_AsInt(level_or_options);
         if (level == -1 && PyErr_Occurred()) {
-            // TODO(emmatyping): Maybe make this error better? (and below)
             PyErr_SetString(PyExc_ValueError,
                             "Compression level should be 32-bit signed int value.");
             return -1;
@@ -425,7 +424,6 @@ _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
 
     /* Load dictionary to compression context */
     if (zstd_dict != NULL) {
-        // TODO(emmatyping): check type of zstd_dict to be ZstdDict_type
         if (load_c_dict(self, zstd_dict) < 0) {
             return -1;
         }
