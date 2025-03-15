@@ -193,7 +193,7 @@ Internal function, train a zstd dictionary on sample data.
 static PyObject *
 _zstd__train_dict_impl(PyObject *module, PyBytesObject *samples_bytes,
                        PyObject *samples_size_list, Py_ssize_t dict_size)
-/*[clinic end generated code: output=ee53c34c8f77886b input=a78890caee5696df]*/
+/*[clinic end generated code: output=ee53c34c8f77886b input=fdb00ebe474d1df9]*/
 {
     Py_ssize_t chunks_number;
     size_t *chunk_sizes = NULL;
@@ -299,7 +299,7 @@ _zstd__finalize_dict_impl(PyObject *module, PyBytesObject *custom_dict_bytes,
                           PyBytesObject *samples_bytes,
                           PyObject *samples_size_list, Py_ssize_t dict_size,
                           int compression_level)
-/*[clinic end generated code: output=9c2a7d8c845cee93 input=0904bda11cdb062f]*/
+/*[clinic end generated code: output=9c2a7d8c845cee93 input=ef6f4f2b0b7e178d]*/
 {
     if (ZSTD_versionNumber() < 10405) {
         /* Must be dynamically linked */
@@ -769,6 +769,10 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
         write_size = ZSTD_CStreamOutSize();
     }
 
+    if (level != Py_None && options != Py_None) {
+        PyErr_SetString(PyExc_RuntimeError, "Only one of level or options should be used.");
+        return NULL;
+    }
     /* TODO(emmatyping): why did these exist?? */
     //assert(read_size == 131072);
     //assert(write_size == 131591);
@@ -1239,11 +1243,11 @@ _zstd.compress
 
     data: Py_buffer
         A bytes-like object, data to be compressed.
-    level: object = NULL
+    level: object  = None
         The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
-    options: object = NULL
+    options: object  = None
         A dict object that contains advanced compression parameters.
-    zstd_dict: object = NULL
+    zstd_dict: object  = None
         A ZstdDict object, a pre-trained zstd dictionary.
 
 Compress data, return a bytes object of zstd compressed data.
@@ -1252,7 +1256,7 @@ Compress data, return a bytes object of zstd compressed data.
 static PyObject *
 _zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
                     PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=0cca9399ca5c95cc input=20805bdcd3282231]*/
+/*[clinic end generated code: output=0cca9399ca5c95cc input=b4d8b6d8c6b759fa]*/
 {
     STATE_FROM_MODULE(module);
     PyObject *ret = NULL;
@@ -1270,7 +1274,7 @@ _zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
 
     if (level != Py_None && options != Py_None) {
         PyErr_SetString(PyExc_RuntimeError, "Only one of level or options should be used.");
-        goto error;
+        return NULL;
     }
 
     /* Set compressLevel/options to compression context */
@@ -1313,9 +1317,9 @@ _zstd.decompress
 
     data: Py_buffer
         A bytes-like object, zstd data to be decompressed.
-    zstd_dict: object = NULL
+    zstd_dict: object  = None
         A ZstdDict object, a pre-trained zstd dictionary.
-    options: object = NULL
+    options: object  = None
         A dict object that contains advanced decompression parameters.
 
 Decompress zstd data, return a bytes object.
@@ -1326,7 +1330,7 @@ Supports multiple concatenated frames.
 static PyObject *
 _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *zstd_dict,
                       PyObject *options)
-/*[clinic end generated code: output=2e8423588fb3b178 input=f21729982777d56c]*/
+/*[clinic end generated code: output=2e8423588fb3b178 input=ef9c89023042d0f9]*/
 {
     uint64_t decompressed_size;
     Py_ssize_t initial_size;

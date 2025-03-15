@@ -739,8 +739,7 @@ exit:
 }
 
 PyDoc_STRVAR(_zstd_compress__doc__,
-"compress($module, /, data, level=<unrepresentable>,\n"
-"         options=<unrepresentable>, zstd_dict=<unrepresentable>)\n"
+"compress($module, /, data, level=None, options=None, zstd_dict=None)\n"
 "--\n"
 "\n"
 "Compress data, return a bytes object of zstd compressed data.\n"
@@ -793,9 +792,9 @@ _zstd_compress(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObje
     PyObject *argsbuf[4];
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
     Py_buffer data = {NULL, NULL};
-    PyObject *level = NULL;
-    PyObject *options = NULL;
-    PyObject *zstd_dict = NULL;
+    PyObject *level = Py_None;
+    PyObject *options = Py_None;
+    PyObject *zstd_dict = Py_None;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 4, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -834,8 +833,7 @@ exit:
 }
 
 PyDoc_STRVAR(_zstd_decompress__doc__,
-"decompress($module, /, data, zstd_dict=<unrepresentable>,\n"
-"           options=<unrepresentable>)\n"
+"decompress($module, /, data, zstd_dict=None, options=None)\n"
 "--\n"
 "\n"
 "Decompress zstd data, return a bytes object.\n"
@@ -888,8 +886,8 @@ _zstd_decompress(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyOb
     PyObject *argsbuf[3];
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
     Py_buffer data = {NULL, NULL};
-    PyObject *zstd_dict = NULL;
-    PyObject *options = NULL;
+    PyObject *zstd_dict = Py_None;
+    PyObject *options = Py_None;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 3, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -920,4 +918,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=abac144eb5913005 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=fb600c0f286004e4 input=a9049054013a1b77]*/
