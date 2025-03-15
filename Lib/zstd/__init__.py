@@ -27,9 +27,13 @@ __all__ = (  # From this file
     "zstd_version",
     "zstd_version_info",
     # From zstd.zstdfile
-    # TODO(emmatyping): 'ZstdFileReader', 'ZstdFileWriter', 'open',
+    "ZstdFileReader",
+    "ZstdFileWriter",
+    "open",
+    "ZstdFile",
     # From zstd.seekable_zstdfile
-    # TODO(emmatyping): 'SeekableZstdFile', 'SeekableFormatError',
+    "SeekableZstdFile",
+    "SeekableFormatError",
 )
 
 from collections import namedtuple
@@ -38,6 +42,8 @@ from functools import lru_cache
 
 from _zstd import *
 import _zstd
+from .zstdfile import ZstdFile, open
+from .seekable_zstdfile import SeekableZstdFile, SeekableFormatError
 
 
 _ZSTD_CStreamSizes = _zstd._ZSTD_CStreamSizes
@@ -81,9 +87,10 @@ class _UnsupportedCParameter:
         self.name = name
 
     def __get__(self, *_, **__):
-        msg = (
-            "%s CParameter not available, zstd version is %s."
-        ) % (self.name, zstd_version)
+        msg = ("%s CParameter not available, zstd version is %s.") % (
+            self.name,
+            zstd_version,
+        )
         raise NotImplementedError(msg)
 
 
