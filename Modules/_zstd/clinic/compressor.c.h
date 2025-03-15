@@ -91,7 +91,7 @@ exit:
 }
 
 PyDoc_STRVAR(_zstd_ZstdCompressor_compress__doc__,
-"compress($self, data, mode=ZstdCompressor.CONTINUE, /)\n"
+"compress($self, /, data, mode=ZstdCompressor.CONTINUE)\n"
 "--\n"
 "\n"
 "Provide data to the compressor object.\n"
@@ -103,33 +103,62 @@ PyDoc_STRVAR(_zstd_ZstdCompressor_compress__doc__,
 "Return a chunk of compressed data if possible, or b\'\' otherwise.");
 
 #define _ZSTD_ZSTDCOMPRESSOR_COMPRESS_METHODDEF    \
-    {"compress", _PyCFunction_CAST(_zstd_ZstdCompressor_compress), METH_FASTCALL, _zstd_ZstdCompressor_compress__doc__},
+    {"compress", _PyCFunction_CAST(_zstd_ZstdCompressor_compress), METH_FASTCALL|METH_KEYWORDS, _zstd_ZstdCompressor_compress__doc__},
 
 static PyObject *
 _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
                                    int mode);
 
 static PyObject *
-_zstd_ZstdCompressor_compress(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+_zstd_ZstdCompressor_compress(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
+
+    #define NUM_KEYWORDS 2
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_item = { &_Py_ID(data), &_Py_ID(mode), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"data", "mode", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "compress",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[2];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
     Py_buffer data = {NULL, NULL};
     int mode = ZSTD_e_continue;
 
-    if (!_PyArg_CheckPositional("compress", nargs, 1, 2)) {
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 1, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
     if (PyObject_GetBuffer(args[0], &data, PyBUF_SIMPLE) != 0) {
         goto exit;
     }
-    if (nargs < 2) {
-        goto skip_optional;
+    if (!noptargs) {
+        goto skip_optional_pos;
     }
     mode = PyLong_AsInt(args[1]);
     if (mode == -1 && PyErr_Occurred()) {
         goto exit;
     }
-skip_optional:
+skip_optional_pos:
     return_value = _zstd_ZstdCompressor_compress_impl((ZstdCompressor *)self, &data, mode);
 
 exit:
@@ -142,7 +171,7 @@ exit:
 }
 
 PyDoc_STRVAR(_zstd_ZstdCompressor_flush__doc__,
-"flush($self, mode=ZstdCompressor.FLUSH_FRAME, /)\n"
+"flush($self, /, mode=ZstdCompressor.FLUSH_FRAME)\n"
 "--\n"
 "\n"
 "Flush any remaining data in internal buffer.\n"
@@ -155,28 +184,57 @@ PyDoc_STRVAR(_zstd_ZstdCompressor_flush__doc__,
 "object can still be used after this method is called.");
 
 #define _ZSTD_ZSTDCOMPRESSOR_FLUSH_METHODDEF    \
-    {"flush", _PyCFunction_CAST(_zstd_ZstdCompressor_flush), METH_FASTCALL, _zstd_ZstdCompressor_flush__doc__},
+    {"flush", _PyCFunction_CAST(_zstd_ZstdCompressor_flush), METH_FASTCALL|METH_KEYWORDS, _zstd_ZstdCompressor_flush__doc__},
 
 static PyObject *
 _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode);
 
 static PyObject *
-_zstd_ZstdCompressor_flush(PyObject *self, PyObject *const *args, Py_ssize_t nargs)
+_zstd_ZstdCompressor_flush(PyObject *self, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
+
+    #define NUM_KEYWORDS 1
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_item = { &_Py_ID(mode), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"mode", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "flush",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[1];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     int mode = ZSTD_e_end;
 
-    if (!_PyArg_CheckPositional("flush", nargs, 0, 1)) {
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
         goto exit;
     }
-    if (nargs < 1) {
-        goto skip_optional;
+    if (!noptargs) {
+        goto skip_optional_pos;
     }
     mode = PyLong_AsInt(args[0]);
     if (mode == -1 && PyErr_Occurred()) {
         goto exit;
     }
-skip_optional:
+skip_optional_pos:
     return_value = _zstd_ZstdCompressor_flush_impl((ZstdCompressor *)self, mode);
 
 exit:
@@ -232,4 +290,4 @@ skip_optional:
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=297e44461aa60081 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=13e749fac44b26be input=a9049054013a1b77]*/

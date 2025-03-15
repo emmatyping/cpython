@@ -532,7 +532,6 @@ _zstd.ZstdCompressor.compress
     mode: int(c_default="ZSTD_e_continue") = ZstdCompressor.CONTINUE
         Can be these 3 values ZstdCompressor.CONTINUE,
         ZstdCompressor.FLUSH_BLOCK, ZstdCompressor.FLUSH_FRAME
-    /
 
 Provide data to the compressor object.
 
@@ -542,7 +541,7 @@ Return a chunk of compressed data if possible, or b'' otherwise.
 static PyObject *
 _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
                                    int mode)
-/*[clinic end generated code: output=ed7982d1cf7b4f98 input=4828e1899e31a4b8]*/
+/*[clinic end generated code: output=ed7982d1cf7b4f98 input=81f01a11e8a7c89e]*/
 {
     PyObject *ret;
 
@@ -587,7 +586,6 @@ _zstd.ZstdCompressor.flush
     mode: int(c_default="ZSTD_e_end") = ZstdCompressor.FLUSH_FRAME
         Can be these 2 values ZstdCompressor.FLUSH_FRAME,
         ZstdCompressor.FLUSH_BLOCK
-    /
 
 Flush any remaining data in internal buffer.
 
@@ -597,7 +595,7 @@ object can still be used after this method is called.
 
 static PyObject *
 _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
-/*[clinic end generated code: output=b7cf2c8d64dcf2e3 input=44cc095b5ebd1c10]*/
+/*[clinic end generated code: output=b7cf2c8d64dcf2e3 input=bcf4671042aa4ab4]*/
 {
     PyObject *ret;
 
