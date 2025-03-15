@@ -819,6 +819,7 @@ extern "C" {
     INIT_ID(bytes_per_sep), \
     INIT_ID(c_call), \
     INIT_ID(c_exception), \
+    INIT_ID(c_parameter_type), \
     INIT_ID(c_return), \
     INIT_ID(cached_datetime_module), \
     INIT_ID(cached_statements), \
@@ -872,6 +873,7 @@ extern "C" {
     INIT_ID(count), \
     INIT_ID(covariant), \
     INIT_ID(cwd), \
+    INIT_ID(d_parameter_type), \
     INIT_ID(data), \
     INIT_ID(database), \
     INIT_ID(day), \
@@ -886,6 +888,7 @@ extern "C" {
     INIT_ID(deterministic), \
     INIT_ID(device), \
     INIT_ID(dict), \
+    INIT_ID(dict_content), \
     INIT_ID(dictcomp), \
     INIT_ID(difference_update), \
     INIT_ID(digest), \
@@ -951,6 +954,7 @@ extern "C" {
     INIT_ID(follow_symlinks), \
     INIT_ID(format), \
     INIT_ID(format_spec), \
+    INIT_ID(frame_buffer), \
     INIT_ID(from_param), \
     INIT_ID(fromlist), \
     INIT_ID(fromtimestamp), \
@@ -1002,12 +1006,15 @@ extern "C" {
     INIT_ID(initval), \
     INIT_ID(inner_size), \
     INIT_ID(input), \
+    INIT_ID(input_stream), \
     INIT_ID(insert_comments), \
     INIT_ID(insert_pis), \
     INIT_ID(instructions), \
     INIT_ID(intern), \
     INIT_ID(intersection), \
     INIT_ID(interval), \
+    INIT_ID(is_compress), \
+    INIT_ID(is_raw), \
     INIT_ID(is_running), \
     INIT_ID(is_struct), \
     INIT_ID(isatty), \
@@ -1128,9 +1135,11 @@ extern "C" {
     INIT_ID(out_fd), \
     INIT_ID(outgoing), \
     INIT_ID(outpath), \
+    INIT_ID(output_stream), \
     INIT_ID(overlapped), \
     INIT_ID(owner), \
     INIT_ID(pages), \
+    INIT_ID(parameter), \
     INIT_ID(parent), \
     INIT_ID(password), \
     INIT_ID(path), \
@@ -1141,6 +1150,7 @@ extern "C" {
     INIT_ID(person), \
     INIT_ID(pi_factory), \
     INIT_ID(pid), \
+    INIT_ID(pledged_input_size), \
     INIT_ID(policy), \
     INIT_ID(pos), \
     INIT_ID(pos1), \
@@ -1160,6 +1170,7 @@ extern "C" {
     INIT_ID(raw), \
     INIT_ID(read), \
     INIT_ID(read1), \
+    INIT_ID(read_size), \
     INIT_ID(readable), \
     INIT_ID(readall), \
     INIT_ID(readinto), \
@@ -1288,9 +1299,11 @@ extern "C" {
     INIT_ID(withdata), \
     INIT_ID(writable), \
     INIT_ID(write), \
+    INIT_ID(write_size), \
     INIT_ID(write_through), \
     INIT_ID(year), \
     INIT_ID(zdict), \
+    INIT_ID(zstd_dict), \
 }
 
 #define _Py_str_ascii_INIT { \

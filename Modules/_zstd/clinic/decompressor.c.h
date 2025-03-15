@@ -10,73 +10,8 @@ preserve
 #include "pycore_critical_section.h"// Py_BEGIN_CRITICAL_SECTION()
 #include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 
-static PyObject *
-_zstd_ZstdDecompressor_impl(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs));
-
-static PyObject *
-_zstd_ZstdDecompressor(PyTypeObject *type, PyObject *args, PyObject *kwargs)
-{
-    PyObject *return_value = NULL;
-    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-
-    #define NUM_KEYWORDS 2
-    static struct {
-        PyGC_Head _this_is_not_used;
-        PyObject_VAR_HEAD
-        PyObject *ob_item[NUM_KEYWORDS];
-    } _kwtuple = {
-        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
-        .ob_item = { &_Py_ID(args), &_Py_ID(kwargs), },
-    };
-    #undef NUM_KEYWORDS
-    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
-
-    #else  // !Py_BUILD_CORE
-    #  define KWTUPLE NULL
-    #endif  // !Py_BUILD_CORE
-
-    static const char * const _keywords[] = {"args", "kwargs", NULL};
-    static _PyArg_Parser _parser = {
-        .keywords = _keywords,
-        .fname = "ZstdDecompressor",
-        .kwtuple = KWTUPLE,
-    };
-    #undef KWTUPLE
-    PyObject *argsbuf[2];
-    PyObject * const *fastargs;
-    Py_ssize_t nargs = PyTuple_GET_SIZE(args);
-    Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *__clinic_args = NULL;
-    PyObject *__clinic_kwargs = NULL;
-
-    fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
-            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
-    if (!fastargs) {
-        goto exit;
-    }
-    if (!noptargs) {
-        goto skip_optional_pos;
-    }
-    if (fastargs[0]) {
-        __clinic_args = fastargs[0];
-        if (!--noptargs) {
-            goto skip_optional_pos;
-        }
-    }
-skip_optional_pos:
-    if (!noptargs) {
-        goto skip_optional_kwonly;
-    }
-    __clinic_kwargs = fastargs[1];
-skip_optional_kwonly:
-    return_value = _zstd_ZstdDecompressor_impl(type, __clinic_args, __clinic_kwargs);
-
-exit:
-    return return_value;
-}
-
 PyDoc_STRVAR(_zstd_ZstdDecompressor___init____doc__,
-"ZstdDecompressor(zstd_dict=<unrepresentable>, options=<unrepresentable>)\n"
+"ZstdDecompressor(zstd_dict=None, options=None)\n"
 "--\n"
 "\n"
 "A streaming decompressor, it stops after a frame is decompressed.\n"
@@ -125,8 +60,8 @@ _zstd_ZstdDecompressor___init__(PyObject *self, PyObject *args, PyObject *kwargs
     PyObject * const *fastargs;
     Py_ssize_t nargs = PyTuple_GET_SIZE(args);
     Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *zstd_dict = NULL;
-    PyObject *options = NULL;
+    PyObject *zstd_dict = Py_None;
+    PyObject *options = Py_None;
 
     fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
             /*minpos*/ 0, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -141,10 +76,6 @@ _zstd_ZstdDecompressor___init__(PyObject *self, PyObject *args, PyObject *kwargs
         if (!--noptargs) {
             goto skip_optional_pos;
         }
-    }
-    if (!PyDict_Check(fastargs[1])) {
-        _PyArg_BadArgument("ZstdDecompressor", "argument 'options'", "dict", fastargs[1]);
-        goto exit;
     }
     options = fastargs[1];
 skip_optional_pos:
@@ -408,4 +339,4 @@ _zstd_EndlessZstdDecompressor__reset_session(PyObject *self, PyObject *Py_UNUSED
 {
     return _zstd_EndlessZstdDecompressor__reset_session_impl((ZstdDecompressor *)self);
 }
-/*[clinic end generated code: output=9ffe96f99643e19e input=a9049054013a1b77]*/
+/*[clinic end generated code: output=24ae40844b09f380 input=a9049054013a1b77]*/

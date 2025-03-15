@@ -9,71 +9,6 @@ preserve
 #include "pycore_critical_section.h"// Py_BEGIN_CRITICAL_SECTION()
 #include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 
-static PyObject *
-_zstd_ZstdDict_impl(PyTypeObject *type, PyObject *args, PyObject *kwargs);
-
-static PyObject *
-_zstd_ZstdDict(PyTypeObject *type, PyObject *args, PyObject *kwargs)
-{
-    PyObject *return_value = NULL;
-    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-
-    #define NUM_KEYWORDS 2
-    static struct {
-        PyGC_Head _this_is_not_used;
-        PyObject_VAR_HEAD
-        PyObject *ob_item[NUM_KEYWORDS];
-    } _kwtuple = {
-        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
-        .ob_item = { &_Py_ID(args), &_Py_ID(kwargs), },
-    };
-    #undef NUM_KEYWORDS
-    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
-
-    #else  // !Py_BUILD_CORE
-    #  define KWTUPLE NULL
-    #endif  // !Py_BUILD_CORE
-
-    static const char * const _keywords[] = {"args", "kwargs", NULL};
-    static _PyArg_Parser _parser = {
-        .keywords = _keywords,
-        .fname = "ZstdDict",
-        .kwtuple = KWTUPLE,
-    };
-    #undef KWTUPLE
-    PyObject *argsbuf[2];
-    PyObject * const *fastargs;
-    Py_ssize_t nargs = PyTuple_GET_SIZE(args);
-    Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *__clinic_args = NULL;
-    PyObject *__clinic_kwargs = NULL;
-
-    fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
-            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
-    if (!fastargs) {
-        goto exit;
-    }
-    if (!noptargs) {
-        goto skip_optional_pos;
-    }
-    if (fastargs[0]) {
-        __clinic_args = fastargs[0];
-        if (!--noptargs) {
-            goto skip_optional_pos;
-        }
-    }
-skip_optional_pos:
-    if (!noptargs) {
-        goto skip_optional_kwonly;
-    }
-    __clinic_kwargs = fastargs[1];
-skip_optional_kwonly:
-    return_value = _zstd_ZstdDict_impl(type, __clinic_args, __clinic_kwargs);
-
-exit:
-    return return_value;
-}
-
 PyDoc_STRVAR(_zstd_ZstdDict___init____doc__,
 "ZstdDict(dict_content, is_raw=False)\n"
 "--\n"
@@ -282,4 +217,4 @@ _zstd_ZstdDict_as_prefix_get(PyObject *self, void *Py_UNUSED(context))
 
     return return_value;
 }
-/*[clinic end generated code: output=66e2ed32c385646e input=a9049054013a1b77]*/
+/*[clinic end generated code: output=80fd347a7e390968 input=a9049054013a1b77]*/

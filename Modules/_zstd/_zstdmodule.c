@@ -727,20 +727,20 @@ _zstd.compress_stream
     output_stream: object = None
         Output stream that has a .write(b) method. If using a callback function, this
         parameter can be None.
-    level: object(subclass_of='&PyLong_Type') = NULL
+    level: object = None
         The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
-    options: object(subclass_of='&PyDict_Type') = NULL
+    options: object = None
         A dict object that contains advanced compression parameters.
-    zstd_dict: object = NULL
+    zstd_dict: object = None
         A ZstdDict object, a pre-trained zstd dictionary.
-    pledged_input_size: object(subclass_of="&PyLong_Type") = NULL
+    pledged_input_size: object = None
         If set this parameter to the size of input data, the size will be written into the
         frame header. If the actual input data doesn't match it, a ZstdError will be raised.
     read_size: Py_ssize_t = -1
         Input buffer size, in bytes.
     write_size: Py_ssize_t = -1
         Output buffer size, in bytes.
-    callback: object = NULL
+    callback: object = None
         A callback function that accepts four parameters:
         (total_input, total_output, read_data, write_data)
         The first two are int objects, the last two are readonly memoryview objects.
@@ -760,7 +760,7 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
                            PyObject *pledged_input_size,
                            Py_ssize_t read_size, Py_ssize_t write_size,
                            PyObject *callback)
-/*[clinic end generated code: output=6d4228f0e7d8160e input=8fadeb3f80981622]*/
+/*[clinic end generated code: output=6d4228f0e7d8160e input=7de6473668d29d09]*/
 {
     if (read_size == -1) {
         read_size = ZSTD_CStreamInSize();
@@ -792,14 +792,14 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
         return NULL;
     }
 
-    if (output_stream != NULL) {
+    if (output_stream != Py_None) {
         if (!PyObject_HasAttr(output_stream, MS_MEMBER(str_write))) {
             PyErr_SetString(PyExc_TypeError,
                             "output_stream argument should have a .write(b) method.");
             return NULL;
         }
     } else {
-        if (callback == NULL) {
+        if (callback == Py_None) {
             PyErr_SetString(PyExc_TypeError,
                             "At least one of output_stream argument and "
                             "callback argument should be non-None.");
@@ -807,7 +807,7 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
         }
     }
 
-    if (pledged_input_size != NULL) {
+    if (pledged_input_size != Py_None) {
         pledged_size_value = PyLong_AsUnsignedLongLong(pledged_input_size);
         if (pledged_size_value == (uint64_t)-1 && PyErr_Occurred()) {
             PyErr_SetString(PyExc_ValueError,
@@ -836,19 +836,19 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
 
 
     /* Set compressLevel/options to compression context */
-    if (level != NULL) {
+    if (level != Py_None) {
         if (_PyZstd_set_c_parameters(&self, level) < 0) {
             goto error;
         }
     }
 
-    if (options != NULL) {
+    if (options != Py_None) {
         if (_PyZstd_set_c_parameters(&self, options) < 0) {
             goto error;
         }
     }
 
-    if (zstd_dict != NULL) {
+    if (zstd_dict != Py_None) {
         if (_PyZstd_load_c_dict(&self, zstd_dict) < 0) {
             goto error;
         }
@@ -933,7 +933,7 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
             total_output_size += out.pos;
 
             /* Write all output to output_stream */
-            if (output_stream != NULL) {
+            if (output_stream != Py_None) {
                 if (write_to_fp(MODULE_STATE, "output_stream.write()",
                                 output_stream, &out) < 0) {
                     goto error;
@@ -941,7 +941,7 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
             }
 
             /* Invoke callback */
-            if (callback != NULL) {
+            if (callback != Py_None) {
                 if (invoke_callback(MODULE_STATE, callback, &in, &callback_read_pos,
                                     &out, total_input_size, total_output_size) < 0) {
                     goto error;
@@ -995,15 +995,15 @@ _zstd.decompress_stream
     output_stream: object = None
         Output stream that has a .write(b) method. If using a callback function, this
         parameter can be None.
-    options: object(subclass_of='&PyDict_Type') = NULL
+    options: object = None
         A dict object that contains advanced decompression parameters.
-    zstd_dict: object = NULL
+    zstd_dict: object = None
         A ZstdDict object, a pre-trained zstd dictionary.
     read_size: Py_ssize_t = -1
         Input buffer size, in bytes.
     write_size: Py_ssize_t = -1
         Output buffer size, in bytes.
-    callback: object = NULL
+    callback: object = None
         A callback function that accepts four parameters:
         (total_input, total_output, read_data, write_data)
         The first two are int objects, the last two are readonly memoryview objects.
@@ -1019,7 +1019,7 @@ _zstd_decompress_stream_impl(PyObject *module, PyObject *input_stream,
                              PyObject *output_stream, PyObject *options,
                              PyObject *zstd_dict, Py_ssize_t read_size,
                              Py_ssize_t write_size, PyObject *callback)
-/*[clinic end generated code: output=49032ae5e133152d input=729514e9cc494b4e]*/
+/*[clinic end generated code: output=49032ae5e133152d input=feeda124bdfd8895]*/
 {
     if (read_size == -1) {
         read_size = ZSTD_CStreamInSize();
@@ -1051,14 +1051,14 @@ _zstd_decompress_stream_impl(PyObject *module, PyObject *input_stream,
         return NULL;
     }
 
-    if (output_stream != NULL) {
+    if (output_stream != Py_None) {
         if (!PyObject_HasAttr(output_stream, MS_MEMBER(str_write))) {
             PyErr_SetString(PyExc_TypeError,
                             "output_stream argument should have a .write(b) method.");
             return NULL;
         }
     } else {
-        if (callback == NULL) {
+        if (callback == Py_None) {
             PyErr_SetString(PyExc_TypeError,
                             "At least one of output_stream argument and "
                             "callback argument should be non-None.");
@@ -1083,14 +1083,14 @@ _zstd_decompress_stream_impl(PyObject *module, PyObject *input_stream,
     self.at_frame_edge = 1;
     self.module_state = MODULE_STATE;
 
-    if (zstd_dict != NULL) {
+    if (zstd_dict != Py_None) {
         if (_PyZstd_load_d_dict(&self, zstd_dict) < 0) {
             goto error;
         }
     }
 
     /* Set option to decompression context */
-    if (options != NULL) {
+    if (options != Py_None) {
         if (_PyZstd_set_d_parameters(&self, options) < 0) {
             goto error;
         }
@@ -1164,7 +1164,7 @@ _zstd_decompress_stream_impl(PyObject *module, PyObject *input_stream,
             total_output_size += out.pos;
 
             /* Write all output to output_stream */
-            if (output_stream != NULL) {
+            if (output_stream != Py_None) {
                 if (write_to_fp(MODULE_STATE, "output_stream.write()",
                                 output_stream, &out) < 0) {
                     goto error;
@@ -1172,7 +1172,7 @@ _zstd_decompress_stream_impl(PyObject *module, PyObject *input_stream,
             }
 
             /* Invoke callback */
-            if (callback != NULL) {
+            if (callback != Py_None) {
                 if (invoke_callback(MODULE_STATE, callback, &in, &callback_read_pos,
                                     &out, total_input_size, total_output_size) < 0) {
                     goto error;
@@ -1239,9 +1239,9 @@ _zstd.compress
 
     data: Py_buffer
         A bytes-like object, data to be compressed.
-    level: object(subclass_of='&PyLong_Type') = NULL
+    level: object = NULL
         The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
-    options: object(subclass_of='&PyDict_Type') = NULL
+    options: object = NULL
         A dict object that contains advanced compression parameters.
     zstd_dict: object = NULL
         A ZstdDict object, a pre-trained zstd dictionary.
@@ -1252,7 +1252,7 @@ Compress data, return a bytes object of zstd compressed data.
 static PyObject *
 _zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
                     PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=0cca9399ca5c95cc input=5e98b2e29c77c3aa]*/
+/*[clinic end generated code: output=0cca9399ca5c95cc input=20805bdcd3282231]*/
 {
     STATE_FROM_MODULE(module);
     PyObject *ret = NULL;
@@ -1268,26 +1268,26 @@ _zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
 
     self.module_state = MODULE_STATE;
 
-    if (level != NULL && options != NULL) {
+    if (level != Py_None && options != Py_None) {
         PyErr_SetString(PyExc_RuntimeError, "Only one of level or options should be used.");
         goto error;
     }
 
     /* Set compressLevel/options to compression context */
-    if (level != NULL) {
+    if (level != Py_None) {
         if (_PyZstd_set_c_parameters(&self, level) < 0) {
             goto error;
         }
     }
 
-    if (options != NULL) {
+    if (options != Py_None) {
         if (_PyZstd_set_c_parameters(&self, options) < 0) {
             goto error;
         }
     }
 
     /* Load dictionary to compression context */
-    if (zstd_dict != NULL) {
+    if (zstd_dict != Py_None) {
         if (_PyZstd_load_c_dict(&self, zstd_dict) < 0) {
             goto error;
         }
@@ -1315,7 +1315,7 @@ _zstd.decompress
         A bytes-like object, zstd data to be decompressed.
     zstd_dict: object = NULL
         A ZstdDict object, a pre-trained zstd dictionary.
-    options: object(subclass_of='&PyDict_Type') = NULL
+    options: object = NULL
         A dict object that contains advanced decompression parameters.
 
 Decompress zstd data, return a bytes object.
@@ -1326,7 +1326,7 @@ Supports multiple concatenated frames.
 static PyObject *
 _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *zstd_dict,
                       PyObject *options)
-/*[clinic end generated code: output=2e8423588fb3b178 input=6203075d1ad1dc47]*/
+/*[clinic end generated code: output=2e8423588fb3b178 input=f21729982777d56c]*/
 {
     uint64_t decompressed_size;
     Py_ssize_t initial_size;
@@ -1347,14 +1347,14 @@ _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *zstd_dict,
     self.module_state = MODULE_STATE;
 
     /* Load dictionary to decompression context */
-    if (zstd_dict != NULL) {
+    if (zstd_dict != Py_None) {
         if (_PyZstd_load_d_dict(&self, zstd_dict) < 0) {
             goto error;
         }
     }
 
     /* Set option to decompression context */
-    if (options != NULL) {
+    if (options != Py_None) {
         if (_PyZstd_set_d_parameters(&self, options) < 0) {
             goto error;
         }

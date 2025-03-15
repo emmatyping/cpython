@@ -279,19 +279,8 @@ load:
 #include "clinic/compressor.c.h"
 #undef clinic_state
 
-/*[clinic input]
-@classmethod
-_zstd.ZstdCompressor.__new__
-
-    args: object(unused=True) = NULL
-    *
-    kwargs: object(unused=True) = NULL
-
-[clinic start generated code]*/
-
 static PyObject *
-_zstd_ZstdCompressor_impl(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs))
-/*[clinic end generated code: output=879c93bffbe769f9 input=224cff98f7432794]*/
+_zstd_ZstdCompressor_new(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs))
 {
     ZstdCompressor *self;
     self = (ZstdCompressor*)type->tp_alloc(type, 0);
@@ -354,11 +343,11 @@ ZstdCompressor_dealloc(ZstdCompressor *self)
 /*[clinic input]
 _zstd.ZstdCompressor.__init__
 
-    level: object(subclass_of='&PyLong_Type') = NULL
+    level: object = None
         The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.
-    options: object(subclass_of='&PyDict_Type') = NULL
+    options: object = None
         A dict object that contains advanced compression parameters.
-    zstd_dict: object = NULL
+    zstd_dict: object = None
         A ZstdDict object, a pre-trained zstd dictionary.
 
 A streaming compressor. Thread-safe at method level.
@@ -367,7 +356,7 @@ A streaming compressor. Thread-safe at method level.
 static int
 _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
                                    PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=215e6c4342732f96 input=934e46a9be560860]*/
+/*[clinic end generated code: output=215e6c4342732f96 input=faab5cc262771cf4]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -376,26 +365,26 @@ _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
     }
     self->inited = 1;
 
-    if (level != NULL && options != NULL) {
+    if (level != Py_None && options != Py_None) {
         PyErr_SetString(PyExc_RuntimeError, "Only one of level or options should be used.");
         return -1;
     }
 
     /* Set compressLevel/options to compression context */
-    if (level != NULL) {
+    if (level != Py_None) {
         if (_PyZstd_set_c_parameters(self, level) < 0) {
             return -1;
         }
     }
 
-    if (options != NULL) {
+    if (options != Py_None) {
         if (_PyZstd_set_c_parameters(self, options) < 0) {
             return -1;
         }
     }
 
     /* Load dictionary to compression context */
-    if (zstd_dict != NULL) {
+    if (zstd_dict != Py_None) {
         if (_PyZstd_load_c_dict(self, zstd_dict) < 0) {
             return -1;
         }
@@ -732,7 +721,7 @@ static PyMemberDef ZstdCompressor_members[] = {
 };
 
 static PyType_Slot zstdcompressor_slots[] = {
-    {Py_tp_new, _zstd_ZstdCompressor},
+    {Py_tp_new, _zstd_ZstdCompressor_new},
     {Py_tp_dealloc, ZstdCompressor_dealloc},
     {Py_tp_init, _zstd_ZstdCompressor___init__},
     {Py_tp_methods, ZstdCompressor_methods},

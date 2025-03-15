@@ -26,19 +26,8 @@ class _zstd.ZstdDict "ZstdDict *" "clinic_state()->ZstdDict_type"
      ZstdDict code
    ----------------- */
 
-/*[clinic input]
-@classmethod
-_zstd.ZstdDict.__new__
-
-    args: object = NULL
-    *
-    kwargs: object = NULL
-
-[clinic start generated code]*/
-
 static PyObject *
-_zstd_ZstdDict_impl(PyTypeObject *type, PyObject *args, PyObject *kwargs)
-/*[clinic end generated code: output=bac595bcbfb6a075 input=f7c8d61820baca39]*/
+_zstd_ZstdDict_new(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs))
 {
     ZstdDict *self;
     self = (ZstdDict*)type->tp_alloc(type, 0);
@@ -301,7 +290,7 @@ static PyType_Slot zstddict_slots[] = {
     {Py_tp_methods, ZstdDict_methods},
     {Py_tp_members, ZstdDict_members},
     {Py_tp_getset, ZstdDict_getset},
-    {Py_tp_new, _zstd_ZstdDict},
+    {Py_tp_new, _zstd_ZstdDict_new},
     {Py_tp_dealloc, ZstdDict_dealloc},
     {Py_tp_init, _zstd_ZstdDict___init__},
     {Py_tp_str, ZstdDict_str},

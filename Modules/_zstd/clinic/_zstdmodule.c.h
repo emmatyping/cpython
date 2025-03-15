@@ -424,10 +424,9 @@ exit:
 
 PyDoc_STRVAR(_zstd_compress_stream__doc__,
 "compress_stream($module, /, input_stream, output_stream=None,\n"
-"                level=<unrepresentable>, options=<unrepresentable>,\n"
-"                zstd_dict=<unrepresentable>,\n"
-"                pledged_input_size=<unrepresentable>, read_size=-1,\n"
-"                write_size=-1, callback=<unrepresentable>)\n"
+"                level=None, options=None, zstd_dict=None,\n"
+"                pledged_input_size=None, read_size=-1, write_size=-1,\n"
+"                callback=None)\n"
 "--\n"
 "\n"
 "Compresses input_stream and writes the compressed data to output_stream.\n"
@@ -504,13 +503,13 @@ _zstd_compress_stream(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
     PyObject *input_stream;
     PyObject *output_stream = Py_None;
-    PyObject *level = NULL;
-    PyObject *options = NULL;
-    PyObject *zstd_dict = NULL;
-    PyObject *pledged_input_size = NULL;
+    PyObject *level = Py_None;
+    PyObject *options = Py_None;
+    PyObject *zstd_dict = Py_None;
+    PyObject *pledged_input_size = Py_None;
     Py_ssize_t read_size = -1;
     Py_ssize_t write_size = -1;
-    PyObject *callback = NULL;
+    PyObject *callback = Py_None;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 9, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -528,20 +527,12 @@ _zstd_compress_stream(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
         }
     }
     if (args[2]) {
-        if (!PyLong_Check(args[2])) {
-            _PyArg_BadArgument("compress_stream", "argument 'level'", "int", args[2]);
-            goto exit;
-        }
         level = args[2];
         if (!--noptargs) {
             goto skip_optional_pos;
         }
     }
     if (args[3]) {
-        if (!PyDict_Check(args[3])) {
-            _PyArg_BadArgument("compress_stream", "argument 'options'", "dict", args[3]);
-            goto exit;
-        }
         options = args[3];
         if (!--noptargs) {
             goto skip_optional_pos;
@@ -554,10 +545,6 @@ _zstd_compress_stream(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
         }
     }
     if (args[5]) {
-        if (!PyLong_Check(args[5])) {
-            _PyArg_BadArgument("compress_stream", "argument 'pledged_input_size'", "int", args[5]);
-            goto exit;
-        }
         pledged_input_size = args[5];
         if (!--noptargs) {
             goto skip_optional_pos;
@@ -607,9 +594,8 @@ exit:
 
 PyDoc_STRVAR(_zstd_decompress_stream__doc__,
 "decompress_stream($module, /, input_stream, output_stream=None,\n"
-"                  options=<unrepresentable>,\n"
-"                  zstd_dict=<unrepresentable>, read_size=-1,\n"
-"                  write_size=-1, callback=<unrepresentable>)\n"
+"                  options=None, zstd_dict=None, read_size=-1,\n"
+"                  write_size=-1, callback=None)\n"
 "--\n"
 "\n"
 "Decompresses input_stream and writes the decompressed data to output_stream.asm\n"
@@ -677,11 +663,11 @@ _zstd_decompress_stream(PyObject *module, PyObject *const *args, Py_ssize_t narg
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
     PyObject *input_stream;
     PyObject *output_stream = Py_None;
-    PyObject *options = NULL;
-    PyObject *zstd_dict = NULL;
+    PyObject *options = Py_None;
+    PyObject *zstd_dict = Py_None;
     Py_ssize_t read_size = -1;
     Py_ssize_t write_size = -1;
-    PyObject *callback = NULL;
+    PyObject *callback = Py_None;
 
     args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 7, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -699,10 +685,6 @@ _zstd_decompress_stream(PyObject *module, PyObject *const *args, Py_ssize_t narg
         }
     }
     if (args[2]) {
-        if (!PyDict_Check(args[2])) {
-            _PyArg_BadArgument("decompress_stream", "argument 'options'", "dict", args[2]);
-            goto exit;
-        }
         options = args[2];
         if (!--noptargs) {
             goto skip_optional_pos;
@@ -827,20 +809,12 @@ _zstd_compress(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObje
         goto skip_optional_pos;
     }
     if (args[1]) {
-        if (!PyLong_Check(args[1])) {
-            _PyArg_BadArgument("compress", "argument 'level'", "int", args[1]);
-            goto exit;
-        }
         level = args[1];
         if (!--noptargs) {
             goto skip_optional_pos;
         }
     }
     if (args[2]) {
-        if (!PyDict_Check(args[2])) {
-            _PyArg_BadArgument("compress", "argument 'options'", "dict", args[2]);
-            goto exit;
-        }
         options = args[2];
         if (!--noptargs) {
             goto skip_optional_pos;
@@ -934,10 +908,6 @@ _zstd_decompress(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyOb
             goto skip_optional_pos;
         }
     }
-    if (!PyDict_Check(args[2])) {
-        _PyArg_BadArgument("decompress", "argument 'options'", "dict", args[2]);
-        goto exit;
-    }
     options = args[2];
 skip_optional_pos:
     return_value = _zstd_decompress_impl(module, &data, zstd_dict, options);
@@ -950,4 +920,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=bf90974130ad138e input=a9049054013a1b77]*/
+/*[clinic end generated code: output=abac144eb5913005 input=a9049054013a1b77]*/

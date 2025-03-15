@@ -582,19 +582,8 @@ success:
      ZstdDecompressor code
    ------------------------- */
 
-/*[clinic input]
-@classmethod
-_zstd.ZstdDecompressor.__new__
-
-    args: object(unused=True) = NULL
-    *
-    kwargs: object(unused=True) = NULL
-
-[clinic start generated code]*/
-
 static PyObject *
-_zstd_ZstdDecompressor_impl(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs))
-/*[clinic end generated code: output=72dd15adf87526d8 input=9de9bd28e503ceea]*/
+_zstd_ZstdDecompressor_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     ZstdDecompressor *self;
     self = (ZstdDecompressor*)type->tp_alloc(type, 0);
@@ -670,9 +659,9 @@ ZstdDecompressor_dealloc(ZstdDecompressor *self)
 /*[clinic input]
 _zstd.ZstdDecompressor.__init__
 
-    zstd_dict: object = NULL
+    zstd_dict: object = None
         A ZstdDict object, a pre-trained zstd dictionary.
-    options: object(subclass_of='&PyDict_Type') = NULL
+    options: object = None
         A dict object that contains advanced decompression parameters.
 
 A streaming decompressor, it stops after a frame is decompressed.
@@ -683,7 +672,7 @@ Thread-safe at method level.
 static int
 _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
                                      PyObject *zstd_dict, PyObject *options)
-/*[clinic end generated code: output=703af2f1ec226642 input=80007f69acd9fd24]*/
+/*[clinic end generated code: output=703af2f1ec226642 input=89434d93e8c2bd33]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -693,7 +682,7 @@ _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
     self->inited = 1;
 
     /* Load dictionary to decompression context */
-    if (zstd_dict != NULL) {
+    if (zstd_dict != Py_None) {
         if (_PyZstd_load_d_dict(self, zstd_dict) < 0) {
             return -1;
         }
@@ -704,7 +693,7 @@ _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
     }
 
     /* Set option to decompression context */
-    if (options != NULL) {
+    if (options != Py_None) {
         if (_PyZstd_set_d_parameters(self, options) < 0) {
             return -1;
         }
@@ -837,7 +826,7 @@ static PyGetSetDef ZstdDecompressor_getset[] = {
 };
 
 static PyType_Slot ZstdDecompressor_slots[] = {
-    {Py_tp_new, _zstd_ZstdDecompressor},
+    {Py_tp_new, _zstd_ZstdDecompressor_new},
     {Py_tp_dealloc, ZstdDecompressor_dealloc},
     {Py_tp_init, _zstd_ZstdDecompressor___init__},
     {Py_tp_methods, ZstdDecompressor_methods},
@@ -935,7 +924,7 @@ static PyMemberDef EndlessZstdDecompressor_members[] = {
 };
 
 static PyType_Slot EndlessZstdDecompressor_slots[] = {
-    {Py_tp_new, _zstd_ZstdDecompressor},
+    {Py_tp_new, _zstd_ZstdDecompressor_new},
     {Py_tp_dealloc, ZstdDecompressor_dealloc},
     {Py_tp_init, _zstd_ZstdDecompressor___init__},
     {Py_tp_methods, EndlessZstdDecompressor_methods},

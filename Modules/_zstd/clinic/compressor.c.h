@@ -8,74 +8,8 @@ preserve
 #endif
 #include "pycore_modsupport.h"    // _PyArg_UnpackKeywords()
 
-static PyObject *
-_zstd_ZstdCompressor_impl(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwargs));
-
-static PyObject *
-_zstd_ZstdCompressor(PyTypeObject *type, PyObject *args, PyObject *kwargs)
-{
-    PyObject *return_value = NULL;
-    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-
-    #define NUM_KEYWORDS 2
-    static struct {
-        PyGC_Head _this_is_not_used;
-        PyObject_VAR_HEAD
-        PyObject *ob_item[NUM_KEYWORDS];
-    } _kwtuple = {
-        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
-        .ob_item = { &_Py_ID(args), &_Py_ID(kwargs), },
-    };
-    #undef NUM_KEYWORDS
-    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
-
-    #else  // !Py_BUILD_CORE
-    #  define KWTUPLE NULL
-    #endif  // !Py_BUILD_CORE
-
-    static const char * const _keywords[] = {"args", "kwargs", NULL};
-    static _PyArg_Parser _parser = {
-        .keywords = _keywords,
-        .fname = "ZstdCompressor",
-        .kwtuple = KWTUPLE,
-    };
-    #undef KWTUPLE
-    PyObject *argsbuf[2];
-    PyObject * const *fastargs;
-    Py_ssize_t nargs = PyTuple_GET_SIZE(args);
-    Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *__clinic_args = NULL;
-    PyObject *__clinic_kwargs = NULL;
-
-    fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
-            /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
-    if (!fastargs) {
-        goto exit;
-    }
-    if (!noptargs) {
-        goto skip_optional_pos;
-    }
-    if (fastargs[0]) {
-        __clinic_args = fastargs[0];
-        if (!--noptargs) {
-            goto skip_optional_pos;
-        }
-    }
-skip_optional_pos:
-    if (!noptargs) {
-        goto skip_optional_kwonly;
-    }
-    __clinic_kwargs = fastargs[1];
-skip_optional_kwonly:
-    return_value = _zstd_ZstdCompressor_impl(type, __clinic_args, __clinic_kwargs);
-
-exit:
-    return return_value;
-}
-
 PyDoc_STRVAR(_zstd_ZstdCompressor___init____doc__,
-"ZstdCompressor(level=<unrepresentable>, options=<unrepresentable>,\n"
-"               zstd_dict=<unrepresentable>)\n"
+"ZstdCompressor(level=None, options=None, zstd_dict=None)\n"
 "--\n"
 "\n"
 "A streaming compressor. Thread-safe at method level.\n"
@@ -124,9 +58,9 @@ _zstd_ZstdCompressor___init__(PyObject *self, PyObject *args, PyObject *kwargs)
     PyObject * const *fastargs;
     Py_ssize_t nargs = PyTuple_GET_SIZE(args);
     Py_ssize_t noptargs = nargs + (kwargs ? PyDict_GET_SIZE(kwargs) : 0) - 0;
-    PyObject *level = NULL;
-    PyObject *options = NULL;
-    PyObject *zstd_dict = NULL;
+    PyObject *level = Py_None;
+    PyObject *options = Py_None;
+    PyObject *zstd_dict = Py_None;
 
     fastargs = _PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
             /*minpos*/ 0, /*maxpos*/ 3, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
@@ -137,20 +71,12 @@ _zstd_ZstdCompressor___init__(PyObject *self, PyObject *args, PyObject *kwargs)
         goto skip_optional_pos;
     }
     if (fastargs[0]) {
-        if (!PyLong_Check(fastargs[0])) {
-            _PyArg_BadArgument("ZstdCompressor", "argument 'level'", "int", fastargs[0]);
-            goto exit;
-        }
         level = fastargs[0];
         if (!--noptargs) {
             goto skip_optional_pos;
         }
     }
     if (fastargs[1]) {
-        if (!PyDict_Check(fastargs[1])) {
-            _PyArg_BadArgument("ZstdCompressor", "argument 'options'", "dict", fastargs[1]);
-            goto exit;
-        }
         options = fastargs[1];
         if (!--noptargs) {
             goto skip_optional_pos;
@@ -306,4 +232,4 @@ skip_optional:
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=d718ddcc588d2c74 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=297e44461aa60081 input=a9049054013a1b77]*/
