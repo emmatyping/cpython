@@ -9,7 +9,7 @@ This module is based on the `pyzstd` project.
 3. PyDoc_StrVar/manual argument parsing is replaced with argument clinic where possible.
 4. Removed forced inlining/no inlining
 5. replaced the inclusion of other .c files in `_zstd.c` with the creation of multiple object files to be linked in to `_zstd.c`. This should make compilation faster and the code easier to understand.
-6. "RichMem" is used by default, which boils down to calculating the output buffer size up-front.
+6. "RichMem" is used by default more or less, which boils down to calculating the output buffer size up-front. We don't use memremap buffers, but this could be contributed separately
 7. The ZSTD_c_targetCBlockSize parameter is omitted as the minimum zstd version is not yet v1.5.6
 8. This implementation uses the standard library output buffer utility
 9. level_or_option replaced with independent level and options kwargs
@@ -17,9 +17,11 @@ This module is based on the `pyzstd` project.
 
 TODOs:
 1. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-2. Go over class __init__/class docs to see if they should be refactored
-3. Compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
-4. Tests
-5. Fuzzing
-6. Docs
+4. More tests!
+5. Fuzzing (upstream libfuzzer integration and use it)
 7. PEP
+
+After-PEP posting:
+1. Go over class __init__/class docs to see if they should be refactored
+2. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
+3. Docs
