@@ -99,7 +99,7 @@ typedef struct {
 
     /* __init__ has been called, 0 or 1. */
     int inited;
-    
+
     _zstd_state *module_state;
 } ZstdDict;
 

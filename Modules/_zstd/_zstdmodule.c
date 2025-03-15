@@ -178,7 +178,7 @@ set_parameter_error(const _zstd_state* const state, int is_compress,
 
 /*[clinic input]
 _zstd._train_dict
-    
+
         samples_bytes: PyBytesObject
             Concatenation of samples.
         samples_size_list: object(subclass_of='&PyList_Type')
@@ -278,7 +278,7 @@ success:
 
 /*[clinic input]
 _zstd._finalize_dict
-    
+
         custom_dict_bytes: PyBytesObject
             Custom dictionary content.
         samples_bytes: PyBytesObject
