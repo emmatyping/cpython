@@ -215,8 +215,8 @@ exit:
     return return_value;
 }
 
-PyDoc_STRVAR(_zstd__get_frame_size__doc__,
-"_get_frame_size($module, /, frame_buffer)\n"
+PyDoc_STRVAR(_zstd_get_frame_size__doc__,
+"get_frame_size($module, /, frame_buffer)\n"
 "--\n"
 "\n"
 "Get the size of a zstd frame, including frame header and 4-byte checksum if it has one.\n"
@@ -227,14 +227,14 @@ PyDoc_STRVAR(_zstd__get_frame_size__doc__,
 "\n"
 "It will iterate all blocks\' header within a frame, to accumulate the frame size.");
 
-#define _ZSTD__GET_FRAME_SIZE_METHODDEF    \
-    {"_get_frame_size", _PyCFunction_CAST(_zstd__get_frame_size), METH_FASTCALL|METH_KEYWORDS, _zstd__get_frame_size__doc__},
+#define _ZSTD_GET_FRAME_SIZE_METHODDEF    \
+    {"get_frame_size", _PyCFunction_CAST(_zstd_get_frame_size), METH_FASTCALL|METH_KEYWORDS, _zstd_get_frame_size__doc__},
 
 static PyObject *
-_zstd__get_frame_size_impl(PyObject *module, Py_buffer *frame_buffer);
+_zstd_get_frame_size_impl(PyObject *module, Py_buffer *frame_buffer);
 
 static PyObject *
-_zstd__get_frame_size(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
+_zstd_get_frame_size(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
     #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
@@ -258,7 +258,7 @@ _zstd__get_frame_size(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
     static const char * const _keywords[] = {"frame_buffer", NULL};
     static _PyArg_Parser _parser = {
         .keywords = _keywords,
-        .fname = "_get_frame_size",
+        .fname = "get_frame_size",
         .kwtuple = KWTUPLE,
     };
     #undef KWTUPLE
@@ -273,7 +273,7 @@ _zstd__get_frame_size(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
     if (PyObject_GetBuffer(args[0], &frame_buffer, PyBUF_SIMPLE) != 0) {
         goto exit;
     }
-    return_value = _zstd__get_frame_size_impl(module, &frame_buffer);
+    return_value = _zstd_get_frame_size_impl(module, &frame_buffer);
 
 exit:
     /* Cleanup for frame_buffer */
@@ -918,4 +918,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=fb600c0f286004e4 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=c248c64bcde2c6cd input=a9049054013a1b77]*/

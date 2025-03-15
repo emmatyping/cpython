@@ -442,7 +442,7 @@ _zstd__get_param_bounds_impl(PyObject *module, int is_compress,
 }
 
 /*[clinic input]
-_zstd._get_frame_size
+_zstd.get_frame_size
 
     frame_buffer: Py_buffer
         A bytes-like object, it should start from the beginning of a frame,
@@ -454,8 +454,8 @@ It will iterate all blocks' header within a frame, to accumulate the frame size.
 [clinic start generated code]*/
 
 static PyObject *
-_zstd__get_frame_size_impl(PyObject *module, Py_buffer *frame_buffer)
-/*[clinic end generated code: output=bfc76ab79174b700 input=5bb556ae8a7fec4a]*/
+_zstd_get_frame_size_impl(PyObject *module, Py_buffer *frame_buffer)
+/*[clinic end generated code: output=a7384c2f8780f442 input=56168aac3d162291]*/
 {
     size_t frame_size;
     PyObject *ret;
@@ -1416,7 +1416,7 @@ static PyMethodDef _zstd_methods[] = {
     _ZSTD__TRAIN_DICT_METHODDEF
     _ZSTD__FINALIZE_DICT_METHODDEF
     _ZSTD__GET_PARAM_BOUNDS_METHODDEF
-    _ZSTD__GET_FRAME_SIZE_METHODDEF
+    _ZSTD_GET_FRAME_SIZE_METHODDEF
     _ZSTD__GET_FRAME_INFO_METHODDEF
     _ZSTD__SET_PARAMETER_TYPES_METHODDEF
     _ZSTD_COMPRESS_STREAM_METHODDEF
