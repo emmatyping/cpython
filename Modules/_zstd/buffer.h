@@ -20,19 +20,10 @@ static inline int
 _OutputBuffer_InitAndGrow(_BlocksOutputBuffer *buffer, ZSTD_outBuffer *ob,
                         const Py_ssize_t max_length)
 {
-    Py_ssize_t block_size;
-
     /* Ensure .list was set to NULL */
     assert(buffer->list == NULL);
 
-    /* Get block size */
-    if (0 <= max_length && max_length < BUFFER_BLOCK_SIZE[0]) {
-        block_size = max_length;
-    } else {
-        block_size = BUFFER_BLOCK_SIZE[0];
-    }
-
-    Py_ssize_t res = _BlocksOutputBuffer_InitAndGrow(buffer, block_size, &ob->dst);
+    Py_ssize_t res = _BlocksOutputBuffer_InitAndGrow(buffer, max_length, &ob->dst);
     if (res < 0) {
         return -1;
     }
