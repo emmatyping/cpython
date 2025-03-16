@@ -13,15 +13,17 @@ This module is based on the `pyzstd` project.
 7. The ZSTD_c_targetCBlockSize parameter is omitted as the minimum zstd version is not yet v1.5.6
 8. This implementation uses the standard library output buffer utility
 9. level_or_option replaced with independent level and options kwargs
+10. ZstdFileReader and ZstdFileWriter were removed as ZstdFile is implemented in Python
 
 
 TODOs:
 1. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-4. More tests!
-5. Fuzzing (upstream libfuzzer integration and use it)
-7. PEP
+2. More tests!
+3. Fuzzing (upstream libfuzzer integration and use it)
+4. PEP
 
 After-PEP posting:
 1. Go over class __init__/class docs to see if they should be refactored
 2. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
-3. Docs
+3. TODOs in code base
+4. Docs (maybe before PEP)
