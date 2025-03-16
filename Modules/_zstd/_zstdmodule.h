@@ -223,7 +223,8 @@ extern int
 _PyZstd_load_d_dict(ZstdDecompressor *self, PyObject *dict);
 
 extern int
-_PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options);
+_PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options,
+                         const char *arg_name, const char *arg_type);
 
 extern int
 _PyZstd_set_d_parameters(ZstdDecompressor *self, PyObject *options);

@@ -30,7 +30,8 @@ class _zstd.ZstdCompressor "ZstdCompressor *" "clinic_state()->ZstdCompressor_ty
 ----------------------- */
 
 int
-_PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options)
+_PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options,
+                         const char *arg_name, const char* arg_type)
 {
     size_t zstd_ret;
     _zstd_state* const _module_state = self->module_state; \
@@ -114,10 +115,7 @@ _PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options)
         }
         return 0;
     }
-
-    /* Wrong type should be unreachable */
-    PyErr_SetString(PyExc_RuntimeError,
-        "Unreachable!");
+    PyErr_Format(PyExc_TypeError, "Invalid type for %s. Expected %s", arg_name, arg_type);
     return -1;
 }
 
@@ -372,13 +370,13 @@ _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
 
     /* Set compressLevel/options to compression context */
     if (level != Py_None) {
-        if (_PyZstd_set_c_parameters(self, level) < 0) {
+        if (_PyZstd_set_c_parameters(self, level, "level", "int") < 0) {
             return -1;
         }
     }
 
     if (options != Py_None) {
-        if (_PyZstd_set_c_parameters(self, options) < 0) {
+        if (_PyZstd_set_c_parameters(self, options, "options", "dict") < 0) {
             return -1;
         }
     }

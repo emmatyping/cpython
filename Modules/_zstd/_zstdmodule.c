@@ -841,13 +841,13 @@ _zstd_compress_stream_impl(PyObject *module, PyObject *input_stream,
 
     /* Set compressLevel/options to compression context */
     if (level != Py_None) {
-        if (_PyZstd_set_c_parameters(&self, level) < 0) {
+        if (_PyZstd_set_c_parameters(&self, level, "level", "int") < 0) {
             goto error;
         }
     }
 
     if (options != Py_None) {
-        if (_PyZstd_set_c_parameters(&self, options) < 0) {
+        if (_PyZstd_set_c_parameters(&self, options, "options", "dict") < 0) {
             goto error;
         }
     }
@@ -1279,13 +1279,13 @@ _zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
 
     /* Set compressLevel/options to compression context */
     if (level != Py_None) {
-        if (_PyZstd_set_c_parameters(&self, level) < 0) {
+        if (_PyZstd_set_c_parameters(&self, level, "level", "int") < 0) {
             goto error;
         }
     }
 
     if (options != Py_None) {
-        if (_PyZstd_set_c_parameters(&self, options) < 0) {
+        if (_PyZstd_set_c_parameters(&self, options, "options", "dict") < 0) {
             goto error;
         }
     }
