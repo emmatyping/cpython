@@ -88,7 +88,7 @@ _OutputBuffer_Finish(_BlocksOutputBuffer *buffer, ZSTD_outBuffer *ob)
 static inline void
 _OutputBuffer_OnError(_BlocksOutputBuffer *buffer)
 {
-    Py_CLEAR(buffer->list);
+    _BlocksOutputBuffer_OnError(buffer);
 }
 
 /* Whether the output data has reached max_length.
