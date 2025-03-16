@@ -27,8 +27,6 @@ __all__ = (  # From this file
     "zstd_version",
     "zstd_version_info",
     # From zstd.zstdfile
-    "ZstdFileReader",
-    "ZstdFileWriter",
     "open",
     "ZstdFile",
     # From zstd.seekable_zstdfile
