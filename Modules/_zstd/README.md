@@ -17,13 +17,18 @@ This module is based on the `pyzstd` project.
 
 
 TODOs:
-1. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-2. More tests!
-3. Fuzzing (upstream libfuzzer integration and use it)
-4. PEP
+1. Add pyzstd license
+2. Remove seekable_zstdfile
+3. Make and use `compression` namespace a la hashlib (and re-export other compression formats)
+4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
+5. Set thread defaults
+6. More tests!
+7. Add integrations with other modules (i.e. zipfile, tarfile)
+8. Go over class __init__/class docs to see if they should be refactored
+9. Fuzzing (upstream libfuzzer integration and use it)
+10. Documentation
+11. Draft PEP
 
 After-PEP posting:
-1. Go over class __init__/class docs to see if they should be refactored
-2. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
-3. TODOs in code base
-4. Docs (maybe before PEP)
+1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
+2. TODOs in code base
