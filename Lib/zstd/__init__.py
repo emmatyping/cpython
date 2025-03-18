@@ -29,9 +29,6 @@ __all__ = (  # From this file
     # From zstd.zstdfile
     "open",
     "ZstdFile",
-    # From zstd.seekable_zstdfile
-    "SeekableZstdFile",
-    "SeekableFormatError",
 )
 
 from collections import namedtuple
@@ -41,7 +38,6 @@ from functools import lru_cache
 from _zstd import *
 import _zstd
 from .zstdfile import ZstdFile, open
-from .seekable_zstdfile import SeekableZstdFile, SeekableFormatError
 
 
 _ZSTD_CStreamSizes = _zstd._ZSTD_CStreamSizes

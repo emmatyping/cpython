@@ -17,8 +17,8 @@ This module is based on the `pyzstd` project.
 
 
 TODOs:
-1. Add pyzstd license
-2. Remove seekable_zstdfile
+1. ~~Add pyzstd license~~
+2. ~~Remove seekable_zstdfile~~
 3. Make and use `compression` namespace a la hashlib (and re-export other compression formats)
 4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
 5. Set thread defaults
