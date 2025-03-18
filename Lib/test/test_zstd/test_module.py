@@ -4,12 +4,12 @@ import random
 import re
 import os
 import unittest
-import _compression
+from compression._common import streams
 from test.support.import_helper import import_module
 from test.support import _1M
 
-zstd = import_module("zstd")
-from zstd import (
+zstd = import_module("compression.zstd")
+from compression.zstd import (
     zstdfile,
     compress,
     decompress,
@@ -361,7 +361,7 @@ class ClassShapeTestCase(unittest.TestCase):
         # These classes and variables can be used to extend ZstdFile,
         # such as SeekableZstdFile(ZstdFile), so pin them down.
         self.assertTrue(issubclass(ZstdFile, io.BufferedIOBase))
-        self.assertIs(ZstdFile._READER_CLASS, _compression.DecompressReader)
+        self.assertIs(ZstdFile._READER_CLASS, streams.DecompressReader)
 
         # mode
         self.assertEqual(zstdfile._MODE_CLOSED, 0)

@@ -19,7 +19,7 @@ This module is based on the `pyzstd` project.
 TODOs:
 1. ~~Add pyzstd license~~
 2. ~~Remove seekable_zstdfile~~
-3. Make and use `compression` namespace a la hashlib (and re-export other compression formats)
+3. ~~Make and use `compression` namespace a la hashlib (and re-export other compression formats)~~
 4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
 5. Set thread defaults
 6. More tests!
@@ -32,3 +32,9 @@ TODOs:
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
 2. TODOs in code base
+
+PEP open questions:
+1. When to deprecate `import lzma` etc?
+2. Should we remove `EndlessZstdDecompressor`? (leaning towards no)
+3. Should we remove `(de)compress_stream`? (leaning towards yes)
+4. Should arguments be made more Pythonic? If so, how?

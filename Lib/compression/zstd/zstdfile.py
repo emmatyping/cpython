@@ -3,7 +3,7 @@ import io
 from os import PathLike
 
 from _zstd import ZstdCompressor, ZstdDecompressor, _ZSTD_DStreamSizes, ZstdError
-import _compression
+from compression._common import streams
 
 __all__ = ("ZstdFile", "open")
 
@@ -14,7 +14,7 @@ _MODE_READ = 1
 _MODE_WRITE = 2
 
 
-class ZstdFile(_compression.BaseStream):
+class ZstdFile(streams.BaseStream):
     """A file object providing transparent zstd (de)compression.
 
     A ZstdFile can act as a wrapper for an existing file object, or refer
@@ -25,7 +25,7 @@ class ZstdFile(_compression.BaseStream):
     supports the Buffer Protocol.
     """
 
-    _READER_CLASS = _compression.DecompressReader
+    _READER_CLASS = streams.DecompressReader
 
     FLUSH_BLOCK = ZstdCompressor.FLUSH_BLOCK
     FLUSH_FRAME = ZstdCompressor.FLUSH_FRAME
