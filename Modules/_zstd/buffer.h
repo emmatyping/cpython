@@ -57,6 +57,8 @@ _OutputBuffer_InitWithSize(_BlocksOutputBuffer *buffer, ZSTD_outBuffer *ob,
     if (res < 0) {
         return -1;
     }
+    // Set max_length, InitWithSize doesn't do this
+    buffer->max_length = max_length;
     ob->size = (size_t) res;
     ob->pos = 0;
     return 0;
