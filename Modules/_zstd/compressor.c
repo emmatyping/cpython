@@ -273,7 +273,7 @@ load:
     return 0;
 }
 
-#define clinic_state() ((_zstd_state*)PyType_GetModuleState(type))
+#define clinic_state() (get_zstd_state(type))
 #include "clinic/compressor.c.h"
 #undef clinic_state
 

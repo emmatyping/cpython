@@ -1772,12 +1772,12 @@ _zstd_free(void *module)
     _zstd_clear((PyObject *)module);
 }
 
-static PyModuleDef_Slot _zstd_slots[] = {
+static struct PyModuleDef_Slot _zstd_slots[] = {
     {Py_mod_exec, _zstd_exec},
     {0}
 };
 
-static PyModuleDef _zstdmodule = {
+struct PyModuleDef _zstdmodule = {
     PyModuleDef_HEAD_INIT,
     .m_name = "_zstd",
     .m_size = sizeof(_zstd_state),

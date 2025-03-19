@@ -788,7 +788,7 @@ _zstd_ZstdDecompressor__reset_session_impl(ZstdDecompressor *self)
     Py_RETURN_NONE;
 }
 
-#define clinic_state() ((_zstd_state*)PyType_GetModuleState(type))
+#define clinic_state() (get_zstd_state(type))
 #include "clinic/decompressor.c.h"
 #undef clinic_state
 

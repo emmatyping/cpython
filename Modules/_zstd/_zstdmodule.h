@@ -21,6 +21,16 @@ Refactored for the CPython standard library by Emma Harper Smith.
 /* Forward declaration of module state */
 typedef struct _zstd_state _zstd_state;
 
+/* Forward reference of module def */
+extern PyModuleDef _zstdmodule;
+
+/* For clinic type calculations */
+static inline _zstd_state *
+get_zstd_state(PyTypeObject *type) {
+    PyObject *module = PyType_GetModuleByDef(type, &_zstdmodule);
+    return PyModule_GetState(module);
+}
+
 /* ------------------
      Global macro
    ------------------ */
@@ -36,7 +46,7 @@ if (!PyThread_acquire_lock((obj)->lock, 0)) { \
     Used in Py_tp_new or Py_tp_init. */
 #define SET_STATE_TO_OBJ(type, obj) \
     do {                                                                \
-        (obj)->module_state = (_zstd_state*)PyType_GetModuleState(type);\
+        (obj)->module_state = get_zstd_state(type);\
         if ((obj)->module_state == NULL) {                              \
             goto error;                                                 \
         }                                                               \
