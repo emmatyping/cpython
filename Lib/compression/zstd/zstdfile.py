@@ -173,6 +173,10 @@ class ZstdFile(streams.BaseStream):
         if self._mode == _MODE_READ:
             return
         self._check_not_closed()
+        if mode not in (self.FLUSH_BLOCK, self.FLUSH_FRAME):
+            raise ValueError("mode argument wrong value, it should be "
+                             "ZstdCompressor.FLUSH_FRAME or "
+                             "ZstdCompressor.FLUSH_BLOCK.")
         if self._compressor.last_mode == mode:
             return
         # Flush zstd block/frame, and write.
