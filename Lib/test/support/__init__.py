@@ -522,7 +522,7 @@ def requires_lzma(reason='requires lzma'):
 
 def requires_zstd(reason='requires zstd'):
     try:
-        import zstd
+        from compression import zstd
     except ImportError:
         zstd = None
     return unittest.skipUnless(zstd, reason)

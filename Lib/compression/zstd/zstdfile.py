@@ -1,3 +1,4 @@
+import builtins
 import io
 
 from os import PathLike
@@ -91,7 +92,7 @@ class ZstdFile(streams.BaseStream):
         if isinstance(filename, (str, bytes, PathLike)):
             if "b" not in mode:
                 mode += "b"
-            self._fp = io.open(filename, mode)
+            self._fp = builtins.open(filename, mode)
             self._closefp = True
         elif hasattr(filename, "read") or hasattr(filename, "write"):
             self._fp = filename
@@ -284,6 +285,15 @@ class ZstdFile(streams.BaseStream):
         """Return the file descriptor for the underlying file."""
         self._check_not_closed()
         return self._fp.fileno()
+
+    @property
+    def name(self):
+        self._check_not_closed()
+        return self._fp.name
+
+    @property
+    def mode(self):
+        return 'wb' if self._mode == _MODE_WRITE else 'rb'
 
     @property
     def closed(self):
