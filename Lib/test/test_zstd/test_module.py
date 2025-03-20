@@ -19,8 +19,6 @@ from compression.zstd import (
     zstdfile,
     compress,
     decompress,
-    compress_stream,
-    decompress_stream,
     ZstdCompressor,
     ZstdDecompressor,
     EndlessZstdDecompressor,
@@ -608,16 +606,6 @@ class CompressorTestCase(unittest.TestCase):
         c = ZstdCompressor()
         self.assertNotEqual(c.compress(b'', c.FLUSH_FRAME), b'')
 
-        # output b''
-        bi = io.BytesIO(b'')
-        bo = io.BytesIO()
-        ret = compress_stream(bi, bo)
-        self.assertEqual(ret, (0, 0))
-        self.assertEqual(bo.getvalue(), b'')
-        bi.close()
-        bo.close()
-
-
 class DecompressorTestCase(unittest.TestCase):
 
     def test_simple_decompress_bad_args(self):
@@ -1040,13 +1028,6 @@ class DecompressorTestCase(unittest.TestCase):
         self.assertEqual(d.decompress(b''), b'')
         self.assertTrue(d.at_frame_edge)
 
-        bi = io.BytesIO(b'')
-        bo = io.BytesIO()
-        ret = decompress_stream(bi, bo)
-        self.assertEqual(ret, (0, 0))
-        self.assertEqual(bo.getvalue(), b'')
-        bi.close()
-        bo.close()
 
     def test_decompress_empty_content_frame(self):
         DAT = compress(b'')

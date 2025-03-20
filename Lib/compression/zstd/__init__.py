@@ -22,8 +22,6 @@ __all__ = (  # From this file
     "compress",
     "decompress",
     "get_frame_size",
-    "compress_stream",
-    "decompress_stream",
     "zstd_version",
     "zstd_version_info",
     # From zstd.zstdfile

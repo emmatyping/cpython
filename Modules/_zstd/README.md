@@ -24,7 +24,7 @@ TODOs:
 5. ~~More tests!~~
 6. ~~Remove `_set_pledged_input_size`~~
 7. ~~Remove `_reset_session`~~
-8. Remove `(de)compress_stream`
+8. ~~Remove `(de)compress_stream`~~
 9. Add integrations with other modules (i.e. zipfile, tarfile)
 10. Go over class __init__/class docs to see if they should be refactored
 11. Documentation
