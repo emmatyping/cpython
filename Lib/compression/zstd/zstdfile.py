@@ -38,8 +38,6 @@ class ZstdFile(streams.BaseStream):
         level=None,
         options=None,
         zstd_dict=None,
-        read_size=None,
-        write_size=None,
     ):
         """Open a zstd compressed file in binary mode.
 
@@ -58,13 +56,6 @@ class ZstdFile(streams.BaseStream):
             parameters.
         zstd_dict: A ZstdDict object, pre-trained dictionary for compression /
             decompression.
-        read_size: In reading mode, this is bytes number that read from the
-            underlying file object each time, default value is zstd's
-            recommended value. If use with Network File System, increasing
-            it may get better performance.
-        write_size: In writing modes, this is output buffer's size, default
-            value is zstd's recommended value. If use with Network File
-            System, increasing it may get better performance.
         """
         self._fp = None
         self._closefp = False
@@ -80,16 +71,14 @@ class ZstdFile(streams.BaseStream):
                         "options."
                     )
                 )
-            if write_size:
-                raise ValueError("write_size argument is only valid in write modes.")
+            if level:
+                raise TypeError("level argument should only be passed when writing.")
             mode_code = _MODE_READ
         elif mode in ("w", "wb", "a", "ab", "x", "xb"):
             if not isinstance(level, (type(None), int)):
                 raise TypeError(("level argument should be an int object."))
             if not isinstance(options, (type(None), dict)):
                 raise TypeError(("options argument should be an dict object."))
-            if read_size:
-                raise ValueError("read_size argument is only valid in read mode.")
             mode_code = _MODE_WRITE
             self._compressor = ZstdCompressor(
                 level=level, options=options, zstd_dict=zstd_dict
@@ -138,29 +127,13 @@ class ZstdFile(streams.BaseStream):
                 self.flush(self.FLUSH_FRAME)
                 self._compressor = None
         finally:
+            self._mode = _MODE_CLOSED
             try:
                 if self._closefp:
                     self._fp.close()
             finally:
                 self._fp = None
                 self._closefp = False
-
-    # None argument means the file should be closed
-    def _check_mode(self, expected_mode=None):
-        # If closed, raise ValueError.
-        if self._mode == _MODE_CLOSED:
-            raise ValueError("I/O operation on closed file")
-
-        # Check _MODE_READ/_MODE_WRITE mode
-        if expected_mode == _MODE_READ:
-            if self._mode != _MODE_READ:
-                raise io.UnsupportedOperation("File not open for reading")
-        elif expected_mode == _MODE_WRITE:
-            if self._mode != _MODE_WRITE:
-                raise io.UnsupportedOperation("File not open for writing")
-
-        # Re-raise other AttributeError exception
-        raise
 
     # If modify this method, also modify SeekableZstdFile.write() method.
     def write(self, data):
@@ -200,11 +173,17 @@ class ZstdFile(streams.BaseStream):
         if self._mode == _MODE_READ:
             return
         self._check_not_closed()
-
+        if mode not in (self.FLUSH_BLOCK, self.FLUSH_FRAME):
+            raise ValueError("mode argument wrong value, it should be "
+                             "ZstdCompressor.FLUSH_FRAME or "
+                             "ZstdCompressor.FLUSH_BLOCK.")
+        if self._compressor.last_mode == mode:
+            return
         # Flush zstd block/frame, and write.
         data = self._compressor.flush(mode)
         self._fp.write(data)
-        self._fp.flush()
+        if hasattr(self._fp, "flush"):
+            self._fp.flush()
 
     def read(self, size=-1):
         """Read up to size uncompressed bytes from the file.
@@ -286,10 +265,6 @@ class ZstdFile(streams.BaseStream):
         # returns at least one byte (except at EOF)
         self._check_can_read()
         return self._buffer.peek(size)
-
-    def __iter__(self):
-        self._check_can_read()
-        return self._buffer
 
     def __next__(self):
         ret = self._buffer.readline()
