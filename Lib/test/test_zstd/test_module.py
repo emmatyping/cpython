@@ -638,7 +638,7 @@ class DecompressorTestCase(unittest.TestCase):
             EndlessZstdDecompressor(options={DParameter.windowLogMax:100})
         with self.assertRaises(ZstdError):
             EndlessZstdDecompressor(options={3333 : 100})
-        
+
         empty = compress(b'')
         lzd = EndlessZstdDecompressor()
         self.assertRaises(TypeError, lzd.decompress)
@@ -799,7 +799,7 @@ class DecompressorTestCase(unittest.TestCase):
 
     def test_decompress_epilogue_flags(self):
         # DAT_130K_C has a 4 bytes checksum at frame epilogue
-        
+
         # full unlimited
         d = EndlessZstdDecompressor()
         dat = d.decompress(DAT_130K_C)
@@ -1701,7 +1701,7 @@ class ZstdDictTestCase(unittest.TestCase):
             ZstdDecompressor((zd, 3))
 
     def test_train_dict(self):
-        
+
 
         TRAINED_DICT = train_dict(SAMPLES, DICT_SIZE1)
         ZstdDict(TRAINED_DICT.dict_content, False)
