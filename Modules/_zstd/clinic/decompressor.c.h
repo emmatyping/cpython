@@ -212,24 +212,6 @@ exit:
     return return_value;
 }
 
-PyDoc_STRVAR(_zstd_ZstdDecompressor__reset_session__doc__,
-"_reset_session($self, /)\n"
-"--\n"
-"\n"
-"This is an undocumented method. Reset decompressor\'s states/session, don\'t reset parameters and dictionary.");
-
-#define _ZSTD_ZSTDDECOMPRESSOR__RESET_SESSION_METHODDEF    \
-    {"_reset_session", (PyCFunction)_zstd_ZstdDecompressor__reset_session, METH_NOARGS, _zstd_ZstdDecompressor__reset_session__doc__},
-
-static PyObject *
-_zstd_ZstdDecompressor__reset_session_impl(ZstdDecompressor *self);
-
-static PyObject *
-_zstd_ZstdDecompressor__reset_session(PyObject *self, PyObject *Py_UNUSED(ignored))
-{
-    return _zstd_ZstdDecompressor__reset_session_impl((ZstdDecompressor *)self);
-}
-
 PyDoc_STRVAR(_zstd_EndlessZstdDecompressor_decompress__doc__,
 "decompress($self, /, data, max_length=-1)\n"
 "--\n"
@@ -321,22 +303,4 @@ exit:
 
     return return_value;
 }
-
-PyDoc_STRVAR(_zstd_EndlessZstdDecompressor__reset_session__doc__,
-"_reset_session($self, /)\n"
-"--\n"
-"\n"
-"This is an undocumented method. Reset decompressor\'s states/session, don\'t reset parameters and dictionary.");
-
-#define _ZSTD_ENDLESSZSTDDECOMPRESSOR__RESET_SESSION_METHODDEF    \
-    {"_reset_session", (PyCFunction)_zstd_EndlessZstdDecompressor__reset_session, METH_NOARGS, _zstd_EndlessZstdDecompressor__reset_session__doc__},
-
-static PyObject *
-_zstd_EndlessZstdDecompressor__reset_session_impl(ZstdDecompressor *self);
-
-static PyObject *
-_zstd_EndlessZstdDecompressor__reset_session(PyObject *self, PyObject *Py_UNUSED(ignored))
-{
-    return _zstd_EndlessZstdDecompressor__reset_session_impl((ZstdDecompressor *)self);
-}
-/*[clinic end generated code: output=24ae40844b09f380 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=0522b30bb855c82e input=a9049054013a1b77]*/

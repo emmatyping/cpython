@@ -769,33 +769,12 @@ _zstd_ZstdDecompressor_decompress_impl(ZstdDecompressor *self,
     return stream_decompress(self, data, max_length, TYPE_DECOMPRESSOR);
 }
 
-/*[clinic input]
-_zstd.ZstdDecompressor._reset_session
-
-
-This is an undocumented method. Reset decompressor's states/session, don't reset parameters and dictionary.
-[clinic start generated code]*/
-
-static PyObject *
-_zstd_ZstdDecompressor__reset_session_impl(ZstdDecompressor *self)
-/*[clinic end generated code: output=f05c0b4ccbaec21a input=d384cfba2db3e71d]*/
-{
-    /* Thread-safe code */
-    ACQUIRE_LOCK(self);
-    decompressor_reset_session(self, TYPE_DECOMPRESSOR);
-    RELEASE_LOCK(self);
-
-    Py_RETURN_NONE;
-}
-
 #define clinic_state() (get_zstd_state(type))
 #include "clinic/decompressor.c.h"
 #undef clinic_state
 
 static PyMethodDef ZstdDecompressor_methods[] = {
     _ZSTD_ZSTDDECOMPRESSOR_DECOMPRESS_METHODDEF
-
-    _ZSTD_ZSTDDECOMPRESSOR__RESET_SESSION_METHODDEF
 
     {0}
 };
@@ -880,30 +859,8 @@ _zstd_EndlessZstdDecompressor_decompress_impl(ZstdDecompressor *self,
     return stream_decompress(self, data, max_length, TYPE_ENDLESS_DECOMPRESSOR);
 }
 
-
-/*[clinic input]
-_zstd.EndlessZstdDecompressor._reset_session
-
-
-This is an undocumented method. Reset decompressor's states/session, don't reset parameters and dictionary.
-[clinic start generated code]*/
-
-static PyObject *
-_zstd_EndlessZstdDecompressor__reset_session_impl(ZstdDecompressor *self)
-/*[clinic end generated code: output=2ba088001d47ef68 input=1ad40dfd00627bac]*/
-{
-    /* Thread-safe code */
-    ACQUIRE_LOCK(self);
-    decompressor_reset_session(self, TYPE_ENDLESS_DECOMPRESSOR);
-    RELEASE_LOCK(self);
-
-    Py_RETURN_NONE;
-}
-
 static PyMethodDef EndlessZstdDecompressor_methods[] = {
     _ZSTD_ENDLESSZSTDDECOMPRESSOR_DECOMPRESS_METHODDEF
-
-    _ZSTD_ENDLESSZSTDDECOMPRESSOR__RESET_SESSION_METHODDEF
 
     {0}
 };
