@@ -623,83 +623,9 @@ _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
     return ret;
 }
 
-/*[clinic input]
-_zstd.ZstdCompressor._set_pledged_input_size
-
-    size: object(subclass_of="&PyLong_Type") = NULL
-        Uncompressed content size of a frame, None means "unknown size".
-    /
-
-*This is an undocumented method, because it may be used incorrectly.*
-
-Since zstd data consists of one or more independent frames, the compressor
-object can still be used after this method is called.
-
-Set uncompressed content size of a frame, the size will be written into the
-frame header.
-1. If called when (.last_mode != .FLUSH_FRAME), a RuntimeError will be raised.
-2. If the actual size doesn't match the value, a ZstdError will be raised, and
-   the last compressed chunk is likely to be lost.
-3. The size is only valid for one frame, then it restores to "unknown size".
-[clinic start generated code]*/
-
-static PyObject *
-_zstd_ZstdCompressor__set_pledged_input_size_impl(ZstdCompressor *self,
-                                                  PyObject *size)
-/*[clinic end generated code: output=2d4bbed8d4e569f5 input=cd419a9321502c2c]*/
-{
-    uint64_t pledged_size;
-    size_t zstd_ret;
-    PyObject *ret;
-
-    /* Get size value */
-    if (size == NULL) {
-        pledged_size = ZSTD_CONTENTSIZE_UNKNOWN;
-    } else {
-        pledged_size = PyLong_AsUnsignedLongLong(size);
-        if (pledged_size == (uint64_t)-1 && PyErr_Occurred()) {
-            PyErr_SetString(PyExc_ValueError,
-                            "size argument should be 64-bit unsigned integer "
-                            "value, or None.");
-            return NULL;
-        }
-    }
-
-    /* Thread-safe code */
-    ACQUIRE_LOCK(self);
-
-    /* Check the current mode */
-    if (self->last_mode != ZSTD_e_end) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "._set_pledged_input_size() method must be called "
-                        "when (.last_mode == .FLUSH_FRAME).");
-        goto error;
-    }
-
-    /* Set pledged content size */
-    zstd_ret = ZSTD_CCtx_setPledgedSrcSize(self->cctx, pledged_size);
-    if (ZSTD_isError(zstd_ret)) {
-        STATE_FROM_OBJ(self);
-        set_zstd_error(MODULE_STATE, ERR_SET_PLEDGED_INPUT_SIZE, zstd_ret);
-        goto error;
-    }
-
-    /* Return None */
-    ret = Py_None;
-    Py_INCREF(ret);
-    goto success;
-
-error:
-    ret = NULL;
-success:
-    RELEASE_LOCK(self);
-    return ret;
-}
-
 static PyMethodDef ZstdCompressor_methods[] = {
     _ZSTD_ZSTDCOMPRESSOR_COMPRESS_METHODDEF
     _ZSTD_ZSTDCOMPRESSOR_FLUSH_METHODDEF
-    _ZSTD_ZSTDCOMPRESSOR__SET_PLEDGED_INPUT_SIZE_METHODDEF
 
     {0}
 };

@@ -21,22 +21,22 @@ TODOs:
 2. ~~Remove seekable_zstdfile~~
 3. ~~Make and use `compression` namespace a la hashlib (and re-export other compression formats)~~
 4. ~~Set thread defaults~~
-5. More tests!
-6. Add integrations with other modules (i.e. zipfile, tarfile)
-7. Go over class __init__/class docs to see if they should be refactored
-8. Fuzzing (upstream libfuzzer integration and use it)
-9. Documentation
-10. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-11. Remove `_set_pledged_input_size`
-12. Remove `_reset_session`?
-12. Draft PEP
+5. ~~More tests!~~
+6. Remove `_set_pledged_input_size`
+7. Remove `_reset_session`
+8. Remove `(de)compress_stream`
+9. Add integrations with other modules (i.e. zipfile, tarfile)
+10. Go over class __init__/class docs to see if they should be refactored
+11. Documentation
+12. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
+13. Draft PEP
 
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
 2. TODOs in code base
+3. Fuzzing (upstream libfuzzer integration and use it)
 
 PEP open questions:
 1. When to deprecate `import lzma` etc?
 2. Should we remove `EndlessZstdDecompressor`? (leaning towards no)
-3. Should we remove `(de)compress_stream`? (leaning towards yes)
-4. Should arguments be made more Pythonic? If so, how?
+3. Should arguments (i.e. options) be made more Pythonic? If so, how?
