@@ -206,7 +206,7 @@ class ZstdFile(streams.BaseStream):
         """
         self._check_can_read()
         if size < 0:
-            size = _ZSTD_DStreamOutSize  # TODO(emmatyping): should this be io.io.DEFAULT_BUFFER_SIZE?
+            size = _ZSTD_DStreamOutSize  # TODO(emmatyping): should this be io.DEFAULT_BUFFER_SIZE?
         return self._buffer.read1(size)
 
     def readinto(self, b):
@@ -336,12 +336,15 @@ def open(
     The mode parameter can be "r", "rb" (default), "w", "wb", "x", "xb", "a",
     "ab" for binary mode, or "rt", "wt", "xt", "at" for text mode.
 
-    The level_or_option and zstd_dict parameters specify the settings, as for
-    ZstdCompressor, ZstdDecompressor and ZstdFile.
+    The level, options, and zstd_dict parameters specify the settings the same
+    as ZstdFile.
 
-    When using read mode (decompression), the level_or_option parameter can
-    only be a dict object, that represents decompression option. It doesn't
-    support int type compression level in this case.
+    When using read mode (decompression), the options parameter is a dict
+    representing advanced decompression options. The level parameter is not
+    supported in this case. When using write mode (compression), only one of
+    level, an int representing the compression level, or options, a dict
+    representing advanced compression options, may be passed. In both modes,
+    zstd_dict is a ZstdDict instance containing a trained Zstandard dictionary.
 
     For binary mode, this function is equivalent to the ZstdFile constructor:
     ZstdFile(filename, mode, ...). In this case, the encoding, errors and

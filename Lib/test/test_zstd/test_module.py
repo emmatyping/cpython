@@ -37,6 +37,7 @@ from compression.zstd import (
     ZstdFile,
     zstd_support_multithread,
 )
+from compression.zstd.zstdfile import open
 
 _1K = 1024
 _130_1K = 130 * _1K
@@ -2842,6 +2843,166 @@ class FileTestCase(unittest.TestCase):
         self.assertTrue(os.path.isfile(filename))
 
         os.remove(filename)
+
+class OpenTestCase(unittest.TestCase):
+
+    def test_binary_modes(self):
+        with open(io.BytesIO(COMPRESSED_100_PLUS_32KB), "rb") as f:
+            self.assertEqual(f.read(), DECOMPRESSED_100_PLUS_32KB)
+        with io.BytesIO() as bio:
+            with open(bio, "wb") as f:
+                f.write(DECOMPRESSED_100_PLUS_32KB)
+            file_data = decompress(bio.getvalue())
+            self.assertEqual(file_data, DECOMPRESSED_100_PLUS_32KB)
+            with open(bio, "ab") as f:
+                f.write(DECOMPRESSED_100_PLUS_32KB)
+            file_data = decompress(bio.getvalue())
+            self.assertEqual(file_data, DECOMPRESSED_100_PLUS_32KB * 2)
+
+    def test_text_modes(self):
+        # empty input
+        with self.assertRaises(EOFError):
+            with open(io.BytesIO(b''), "rt", encoding="utf-8", newline='\n') as reader:
+                for _ in reader:
+                    pass
+
+        # read
+        uncompressed = THIS_FILE_STR.replace(os.linesep, "\n")
+        with open(io.BytesIO(COMPRESSED_THIS_FILE), "rt", encoding="utf-8") as f:
+            self.assertEqual(f.read(), uncompressed)
+
+        with io.BytesIO() as bio:
+            # write
+            with open(bio, "wt", encoding="utf-8") as f:
+                f.write(uncompressed)
+            file_data = decompress(bio.getvalue()).decode("utf-8")
+            self.assertEqual(file_data.replace(os.linesep, "\n"), uncompressed)
+            # append
+            with open(bio, "at", encoding="utf-8") as f:
+                f.write(uncompressed)
+            file_data = decompress(bio.getvalue()).decode("utf-8")
+            self.assertEqual(file_data.replace(os.linesep, "\n"), uncompressed * 2)
+
+    def test_bad_params(self):
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_f:
+            TESTFN = pathlib.Path(tmp_f.name)
+
+        with self.assertRaises(ValueError):
+            open(TESTFN, "")
+        with self.assertRaises(ValueError):
+            open(TESTFN, "rbt")
+        with self.assertRaises(ValueError):
+            open(TESTFN, "rb", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            open(TESTFN, "rb", errors="ignore")
+        with self.assertRaises(ValueError):
+            open(TESTFN, "rb", newline="\n")
+
+        os.remove(TESTFN)
+
+    def test_option(self):
+        options = {DParameter.windowLogMax:25}
+        with open(io.BytesIO(COMPRESSED_100_PLUS_32KB), "rb", options=options) as f:
+            self.assertEqual(f.read(), DECOMPRESSED_100_PLUS_32KB)
+
+        options = {CParameter.compressionLevel:12}
+        with io.BytesIO() as bio:
+            with open(bio, "wb", options=options) as f:
+                f.write(DECOMPRESSED_100_PLUS_32KB)
+            file_data = decompress(bio.getvalue())
+            self.assertEqual(file_data, DECOMPRESSED_100_PLUS_32KB)
+
+    def test_encoding(self):
+        uncompressed = THIS_FILE_STR.replace(os.linesep, "\n")
+
+        with io.BytesIO() as bio:
+            with open(bio, "wt", encoding="utf-16-le") as f:
+                f.write(uncompressed)
+            file_data = decompress(bio.getvalue()).decode("utf-16-le")
+            self.assertEqual(file_data.replace(os.linesep, "\n"), uncompressed)
+            bio.seek(0)
+            with open(bio, "rt", encoding="utf-16-le") as f:
+                self.assertEqual(f.read().replace(os.linesep, "\n"), uncompressed)
+
+    def test_encoding_error_handler(self):
+        with io.BytesIO(compress(b"foo\xffbar")) as bio:
+            with open(bio, "rt", encoding="ascii", errors="ignore") as f:
+                self.assertEqual(f.read(), "foobar")
+
+    def test_newline(self):
+        # Test with explicit newline (universal newline mode disabled).
+        text = THIS_FILE_STR.replace(os.linesep, "\n")
+        with io.BytesIO() as bio:
+            with open(bio, "wt", encoding="utf-8", newline="\n") as f:
+                f.write(text)
+            bio.seek(0)
+            with open(bio, "rt", encoding="utf-8", newline="\r") as f:
+                self.assertEqual(f.readlines(), [text])
+
+    def test_x_mode(self):
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_f:
+            TESTFN = pathlib.Path(tmp_f.name)
+
+        for mode in ("x", "xb", "xt"):
+            os.remove(TESTFN)
+
+            if mode == "xt":
+                encoding = "utf-8"
+            else:
+                encoding = None
+            with open(TESTFN, mode, encoding=encoding):
+                pass
+            with self.assertRaises(FileExistsError):
+                with open(TESTFN, mode):
+                    pass
+
+        os.remove(TESTFN)
+
+    def test_open_dict(self):
+        # default
+        bi = io.BytesIO()
+        with open(bi, 'w', zstd_dict=TRAINED_DICT) as f:
+            f.write(SAMPLES[0])
+        bi.seek(0)
+        with open(bi, zstd_dict=TRAINED_DICT) as f:
+            dat = f.read()
+        self.assertEqual(dat, SAMPLES[0])
+
+        # .as_(un)digested_dict
+        bi = io.BytesIO()
+        with open(bi, 'w', zstd_dict=TRAINED_DICT.as_digested_dict) as f:
+            f.write(SAMPLES[0])
+        bi.seek(0)
+        with open(bi, zstd_dict=TRAINED_DICT.as_undigested_dict) as f:
+            dat = f.read()
+        self.assertEqual(dat, SAMPLES[0])
+
+        # invalid dictionary
+        bi = io.BytesIO()
+        with self.assertRaisesRegex(TypeError, 'zstd_dict'):
+            open(bi, 'w', zstd_dict={1:2, 2:3})
+
+        with self.assertRaisesRegex(TypeError, 'zstd_dict'):
+            open(bi, 'w', zstd_dict=b'1234567890')
+
+    def test_open_prefix(self):
+        bi = io.BytesIO()
+        with open(bi, 'w', zstd_dict=TRAINED_DICT.as_prefix) as f:
+            f.write(SAMPLES[0])
+        bi.seek(0)
+        with open(bi, zstd_dict=TRAINED_DICT.as_prefix) as f:
+            dat = f.read()
+        self.assertEqual(dat, SAMPLES[0])
+
+    def test_buffer_protocol(self):
+        # don't use len() for buffer protocol objects
+        arr = array.array("i", range(1000))
+        LENGTH = len(arr) * arr.itemsize
+
+        with open(io.BytesIO(), "wb") as f:
+            self.assertEqual(f.write(arr), LENGTH)
+            self.assertEqual(f.tell(), LENGTH)
+
 
 if __name__ == "__main__":
     unittest.main()
