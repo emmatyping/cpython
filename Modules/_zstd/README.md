@@ -14,6 +14,8 @@ This module is based on the `pyzstd` project.
 8. This implementation uses the standard library output buffer utility
 9. level_or_option replaced with independent level and options kwargs
 10. ZstdFileReader and ZstdFileWriter were removed as ZstdFile is implemented in Python
+11. `_set_pledged_input_size`, `_reset_session`, and `(de)compress_stream` were all removed
+12. `ZstdDict.as_prefix` is removed, to keep the initial API simpler.
 
 
 TODOs:
@@ -25,18 +27,21 @@ TODOs:
 6. ~~Remove `_set_pledged_input_size`~~
 7. ~~Remove `_reset_session`~~
 8. ~~Remove `(de)compress_stream`~~
-9. Add integrations with other modules (i.e. zipfile, tarfile)
+9. ~~Add integrations with other modules (i.e. zipfile, tarfile, shutil)~~
 10. Go over class __init__/class docs to see if they should be refactored
 11. Documentation
-12. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-13. Draft PEP
+12. Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)
+13. Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)
+14. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
+15. Check that compressor `flush` disables the compressor from being re-used to match lzma/bz2/etc API
+15. Draft PEP
 
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
 2. TODOs in code base
 3. Fuzzing (upstream libfuzzer integration and use it)
 
-PEP open questions:
+PEP/Review open questions:
 1. When to deprecate `import lzma` etc?
 2. Should we remove `EndlessZstdDecompressor`? (leaning towards no)
-3. Should arguments (i.e. options) be made more Pythonic? If so, how?
+3. Should arguments (i.e. options) be made more Pythonic? If so, how? (should `level` be renamed to `compresslevel`?)
