@@ -28,18 +28,19 @@ TODOs:
 7. ~~Remove `_reset_session`~~
 8. ~~Remove `(de)compress_stream`~~
 9. ~~Add integrations with other modules (i.e. zipfile, tarfile, shutil)~~
-10. Go over class __init__/class docs to see if they should be refactored
-11. Documentation
-12. Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)
-13. Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)
-14. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files)
-15. Check that compressor `flush` disables the compressor from being re-used to match lzma/bz2/etc API
-15. Draft PEP
+10. ~~Documentation~~
+11. Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)
+12. Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)
+13. Check that compressor `flush` disables the compressor from being re-used to match lzma/bz2/etc API
+14. Draft PEP
 
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
 2. TODOs in code base
-3. Fuzzing (upstream libfuzzer integration and use it)
+3. Go over class __init__/class docs to see if they should be refactored
+4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files). Still not sure how to add zstd properly to cpython-source-deps
+5. Add docs for CParameter/DParameter
+6. Fuzzing (upstream libfuzzer integration and use it)
 
 PEP/Review open questions:
 1. When to deprecate `import lzma` etc?

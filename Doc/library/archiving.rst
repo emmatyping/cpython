@@ -18,3 +18,5 @@ module.
    lzma.rst
    zipfile.rst
    tarfile.rst
+   compression.rst
+   compression.zstd.rst
