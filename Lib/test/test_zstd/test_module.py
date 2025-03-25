@@ -407,7 +407,7 @@ class ClassShapeTestCase(unittest.TestCase):
 
     def test_ZstdFile_extend(self):
         # These classes and variables can be used to extend ZstdFile,
-        # such as SeekableZstdFile(ZstdFile), so pin them down.
+        # so pin them down.
         self.assertTrue(issubclass(ZstdFile, io.BufferedIOBase))
         self.assertIs(ZstdFile._READER_CLASS, streams.DecompressReader)
 
