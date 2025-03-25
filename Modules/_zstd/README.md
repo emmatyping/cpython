@@ -29,10 +29,9 @@ TODOs:
 8. ~~Remove `(de)compress_stream`~~
 9. ~~Add integrations with other modules (i.e. zipfile, tarfile, shutil)~~
 10. ~~Documentation~~
-11. Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)
-12. Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)
-13. Check that compressor `flush` disables the compressor from being re-used to match lzma/bz2/etc API
-14. Draft PEP
+11. ~~Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)~~ handled by compression._common.streams.BaseStream, see the `test_read_multistream` test.
+12. ~~Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)~~ with/iter exercised in `test_iterator`. Verified it matches the shape of BufferedIOBase.
+13. Draft PEP
 
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
@@ -40,9 +39,11 @@ After-PEP posting:
 3. Go over class __init__/class docs to see if they should be refactored
 4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files). Still not sure how to add zstd properly to cpython-source-deps
 5. Add docs for CParameter/DParameter
-6. Fuzzing (upstream libfuzzer integration and use it)
+6. Add test for method 20 reading to test_zipfile
+7. Fuzzing (upstream libfuzzer integration and use it)
 
 PEP/Review open questions:
 1. When to deprecate `import lzma` etc?
 2. Should we remove `EndlessZstdDecompressor`? (leaning towards no)
 3. Should arguments (i.e. options) be made more Pythonic? If so, how? (should `level` be renamed to `compresslevel`?)
+4. Should the compressor only be able to handle a single frame? The underlying APIs allow compressing more than one frame.
