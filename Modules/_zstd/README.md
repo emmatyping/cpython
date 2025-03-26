@@ -40,10 +40,11 @@ After-PEP posting:
 4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files). Still not sure how to add zstd properly to cpython-source-deps
 5. Add docs for CParameter/DParameter
 6. Add test for method 20 reading to test_zipfile
+7. Add deprecations for existing compression libraries
 7. Fuzzing (upstream libfuzzer integration and use it)
 
 PEP/Review open questions:
 1. When to deprecate `import lzma` etc?
-2. Should we remove `EndlessZstdDecompressor`? (leaning towards no)
+2. Should we remove `EndlessZstdDecompressor`? (leaning towards yes)
 3. Should arguments (i.e. options) be made more Pythonic? If so, how? (should `level` be renamed to `compresslevel`?)
 4. Should the compressor only be able to handle a single frame? The underlying APIs allow compressing more than one frame.
