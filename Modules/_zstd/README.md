@@ -36,12 +36,13 @@ TODOs:
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
 2. TODOs in code base
-3. Go over class __init__/class docs to see if they should be refactored
+3. Go over class `__init__`/class docs to see if they should be refactored
 4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files). Still not sure how to add zstd properly to cpython-source-deps
 5. Add docs for CParameter/DParameter
 6. Add test for method 20 reading to test_zipfile
 7. Add deprecations for existing compression libraries
-7. Fuzzing (upstream libfuzzer integration and use it)
+8. Defaults and more tests for threading
+9. Fuzzing (upstream libfuzzer integration and use it)
 
 PEP/Review open questions:
 1. When to deprecate `import lzma` etc?
