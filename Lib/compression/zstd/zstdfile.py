@@ -204,7 +204,10 @@ class ZstdFile(streams.BaseStream):
         """
         self._check_can_read()
         if size < 0:
-            size = _ZSTD_DStreamOutSize  # TODO(emmatyping): should this be io.DEFAULT_BUFFER_SIZE?
+            # Note this should *not* be io.DEFAULT_BUFFER_SIZE.
+            # ZSTD_DStreamOutSize is the minimum amount to read guaranteeing
+            # a full block is read.
+            size = _ZSTD_DStreamOutSize
         return self._buffer.read1(size)
 
     def readinto(self, b):
