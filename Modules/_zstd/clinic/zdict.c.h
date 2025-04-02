@@ -13,7 +13,7 @@ PyDoc_STRVAR(_zstd_ZstdDict___init____doc__,
 "ZstdDict(dict_content, is_raw=False)\n"
 "--\n"
 "\n"
-"Initialize a ZstdDict object.\n"
+"Represents a zstd dictionary, which can be used for compression/decompression.\n"
 "\n"
 "  dict_content\n"
 "    A bytes-like object, dictionary\'s content.\n"
@@ -22,7 +22,10 @@ PyDoc_STRVAR(_zstd_ZstdDict___init____doc__,
 "    argument is a \"raw content\" dictionary, free of any format\n"
 "    restriction. False means dict_content argument is an ordinary\n"
 "    zstd dictionary, was created by zstd functions, follow a\n"
-"    specified format.");
+"    specified format.\n"
+"\n"
+"It\'s thread-safe, and can be shared by multiple ZstdCompressor /\n"
+"ZstdDecompressor objects.");
 
 static int
 _zstd_ZstdDict___init___impl(ZstdDict *self, PyObject *dict_content,
@@ -217,4 +220,4 @@ _zstd_ZstdDict_as_prefix_get(PyObject *self, void *Py_UNUSED(context))
 
     return return_value;
 }
-/*[clinic end generated code: output=80fd347a7e390968 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=322ebb6d452bd6b8 input=a9049054013a1b77]*/

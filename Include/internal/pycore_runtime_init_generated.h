@@ -1006,7 +1006,6 @@ extern "C" {
     INIT_ID(initval), \
     INIT_ID(inner_size), \
     INIT_ID(input), \
-    INIT_ID(input_stream), \
     INIT_ID(insert_comments), \
     INIT_ID(insert_pis), \
     INIT_ID(instructions), \
@@ -1135,7 +1134,6 @@ extern "C" {
     INIT_ID(out_fd), \
     INIT_ID(outgoing), \
     INIT_ID(outpath), \
-    INIT_ID(output_stream), \
     INIT_ID(overlapped), \
     INIT_ID(owner), \
     INIT_ID(pages), \
@@ -1150,7 +1148,6 @@ extern "C" {
     INIT_ID(person), \
     INIT_ID(pi_factory), \
     INIT_ID(pid), \
-    INIT_ID(pledged_input_size), \
     INIT_ID(policy), \
     INIT_ID(pos), \
     INIT_ID(pos1), \
@@ -1170,7 +1167,6 @@ extern "C" {
     INIT_ID(raw), \
     INIT_ID(read), \
     INIT_ID(read1), \
-    INIT_ID(read_size), \
     INIT_ID(readable), \
     INIT_ID(readall), \
     INIT_ID(readinto), \
@@ -1299,7 +1295,6 @@ extern "C" {
     INIT_ID(withdata), \
     INIT_ID(writable), \
     INIT_ID(write), \
-    INIT_ID(write_size), \
     INIT_ID(write_through), \
     INIT_ID(year), \
     INIT_ID(zdict), \

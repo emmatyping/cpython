@@ -96,13 +96,16 @@ _zstd.ZstdDict.__init__
         zstd dictionary, was created by zstd functions, follow a
         specified format.
 
-Initialize a ZstdDict object.
+Represents a zstd dictionary, which can be used for compression/decompression.
+
+It's thread-safe, and can be shared by multiple ZstdCompressor /
+ZstdDecompressor objects.
 [clinic start generated code]*/
 
 static int
 _zstd_ZstdDict___init___impl(ZstdDict *self, PyObject *dict_content,
                              int is_raw)
-/*[clinic end generated code: output=c5f5a0d8377d037c input=64c0388f7f130398]*/
+/*[clinic end generated code: output=c5f5a0d8377d037c input=e6750f62a513b3ee]*/
 {
     /* Only called once */
     if (self->inited) {

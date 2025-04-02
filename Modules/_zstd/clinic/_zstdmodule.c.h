@@ -225,7 +225,7 @@ PyDoc_STRVAR(_zstd_get_frame_size__doc__,
 "    A bytes-like object, it should start from the beginning of a frame,\n"
 "    and contains at least one complete frame.\n"
 "\n"
-"It will iterate all blocks\' header within a frame, to accumulate the frame size.");
+"It will iterate all blocks\' headers within a frame, to accumulate the frame size.");
 
 #define _ZSTD_GET_FRAME_SIZE_METHODDEF    \
     {"get_frame_size", _PyCFunction_CAST(_zstd_get_frame_size), METH_FASTCALL|METH_KEYWORDS, _zstd_get_frame_size__doc__},
@@ -426,7 +426,7 @@ PyDoc_STRVAR(_zstd_compress__doc__,
 "compress($module, /, data, level=None, options=None, zstd_dict=None)\n"
 "--\n"
 "\n"
-"Compress data, return a bytes object of zstd compressed data.\n"
+"Compress a block of data, return a bytes object of zstd compressed data.\n"
 "\n"
 "  data\n"
 "    A bytes-like object, data to be compressed.\n"
@@ -435,7 +435,12 @@ PyDoc_STRVAR(_zstd_compress__doc__,
 "  options\n"
 "    A dict object that contains advanced compression parameters.\n"
 "  zstd_dict\n"
-"    A ZstdDict object, a pre-trained zstd dictionary.");
+"    A ZstdDict object, a pre-trained zstd dictionary.\n"
+"\n"
+"Refer to ZstdCompressor\'s docstring for a description of the\n"
+"optional arguments *level*, *options*, and *zstd_dict*.\n"
+"\n"
+"For incremental compression, use an ZstdCompressor instead.");
 
 #define _ZSTD_COMPRESS_METHODDEF    \
     {"compress", _PyCFunction_CAST(_zstd_compress), METH_FASTCALL|METH_KEYWORDS, _zstd_compress__doc__},
@@ -520,7 +525,7 @@ PyDoc_STRVAR(_zstd_decompress__doc__,
 "decompress($module, /, data, zstd_dict=None, options=None)\n"
 "--\n"
 "\n"
-"Decompress zstd data, return a bytes object.\n"
+"Decompress one or more frames of data.\n"
 "\n"
 "  data\n"
 "    A bytes-like object, zstd data to be decompressed.\n"
@@ -529,7 +534,10 @@ PyDoc_STRVAR(_zstd_decompress__doc__,
 "  options\n"
 "    A dict object that contains advanced decompression parameters.\n"
 "\n"
-"Supports multiple concatenated frames.");
+"Refer to ZstdDecompressor\'s docstring for a description of the\n"
+"optional arguments *zstd_dict*, *options*.\n"
+"\n"
+"For incremental decompression, use an ZstdDecompressor instead.");
 
 #define _ZSTD_DECOMPRESS_METHODDEF    \
     {"decompress", _PyCFunction_CAST(_zstd_decompress), METH_FASTCALL|METH_KEYWORDS, _zstd_decompress__doc__},
@@ -602,4 +610,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=77b879fed35c3d45 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=af1508983250533c input=a9049054013a1b77]*/

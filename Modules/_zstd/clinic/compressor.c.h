@@ -12,14 +12,17 @@ PyDoc_STRVAR(_zstd_ZstdCompressor___init____doc__,
 "ZstdCompressor(level=None, options=None, zstd_dict=None)\n"
 "--\n"
 "\n"
-"A streaming compressor. Thread-safe at method level.\n"
+"Create a compressor object for compressing data incrementally.\n"
 "\n"
 "  level\n"
 "    The compression level to use, defaults to ZSTD_CLEVEL_DEFAULT.\n"
 "  options\n"
 "    A dict object that contains advanced compression parameters.\n"
 "  zstd_dict\n"
-"    A ZstdDict object, a pre-trained zstd dictionary.");
+"    A ZstdDict object, a pre-trained zstd dictionary.\n"
+"\n"
+"Thread-safe at method level. For one-shot compression, use the compress()\n"
+"function instead.");
 
 static int
 _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
@@ -100,7 +103,9 @@ PyDoc_STRVAR(_zstd_ZstdCompressor_compress__doc__,
 "    Can be these 3 values ZstdCompressor.CONTINUE,\n"
 "    ZstdCompressor.FLUSH_BLOCK, ZstdCompressor.FLUSH_FRAME\n"
 "\n"
-"Return a chunk of compressed data if possible, or b\'\' otherwise.");
+"Return a chunk of compressed data if possible, or b\'\' otherwise. When you have\n"
+"finished providing data to the compressor, call the flush() method to finish\n"
+"the compression process.");
 
 #define _ZSTD_ZSTDCOMPRESSOR_COMPRESS_METHODDEF    \
     {"compress", _PyCFunction_CAST(_zstd_ZstdCompressor_compress), METH_FASTCALL|METH_KEYWORDS, _zstd_ZstdCompressor_compress__doc__},
@@ -174,14 +179,15 @@ PyDoc_STRVAR(_zstd_ZstdCompressor_flush__doc__,
 "flush($self, /, mode=ZstdCompressor.FLUSH_FRAME)\n"
 "--\n"
 "\n"
-"Flush any remaining data in internal buffer.\n"
+"Finish the compression process.\n"
 "\n"
 "  mode\n"
 "    Can be these 2 values ZstdCompressor.FLUSH_FRAME,\n"
 "    ZstdCompressor.FLUSH_BLOCK\n"
 "\n"
-"Since zstd data consists of one or more independent frames, the compressor\n"
-"object can still be used after this method is called.");
+"Flush any remaining data left in internal buffers. Since zstd data consists\n"
+"of one or more independent frames, the compressor object can still be used\n"
+"after this method is called.");
 
 #define _ZSTD_ZSTDCOMPRESSOR_FLUSH_METHODDEF    \
     {"flush", _PyCFunction_CAST(_zstd_ZstdCompressor_flush), METH_FASTCALL|METH_KEYWORDS, _zstd_ZstdCompressor_flush__doc__},
@@ -240,4 +246,4 @@ skip_optional_pos:
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=a92592ff21292a95 input=a9049054013a1b77]*/
+/*[clinic end generated code: output=d03345cbe28e9692 input=a9049054013a1b77]*/

@@ -348,13 +348,16 @@ _zstd.ZstdCompressor.__init__
     zstd_dict: object = None
         A ZstdDict object, a pre-trained zstd dictionary.
 
-A streaming compressor. Thread-safe at method level.
+Create a compressor object for compressing data incrementally.
+
+Thread-safe at method level. For one-shot compression, use the compress()
+function instead.
 [clinic start generated code]*/
 
 static int
 _zstd_ZstdCompressor___init___impl(ZstdCompressor *self, PyObject *level,
                                    PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=215e6c4342732f96 input=faab5cc262771cf4]*/
+/*[clinic end generated code: output=215e6c4342732f96 input=9f79b0d8d34c8ef0]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -533,13 +536,15 @@ _zstd.ZstdCompressor.compress
 
 Provide data to the compressor object.
 
-Return a chunk of compressed data if possible, or b'' otherwise.
+Return a chunk of compressed data if possible, or b'' otherwise. When you have
+finished providing data to the compressor, call the flush() method to finish
+the compression process.
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
                                    int mode)
-/*[clinic end generated code: output=ed7982d1cf7b4f98 input=81f01a11e8a7c89e]*/
+/*[clinic end generated code: output=ed7982d1cf7b4f98 input=ac2c21d180f579ea]*/
 {
     PyObject *ret;
 
@@ -585,15 +590,16 @@ _zstd.ZstdCompressor.flush
         Can be these 2 values ZstdCompressor.FLUSH_FRAME,
         ZstdCompressor.FLUSH_BLOCK
 
-Flush any remaining data in internal buffer.
+Finish the compression process.
 
-Since zstd data consists of one or more independent frames, the compressor
-object can still be used after this method is called.
+Flush any remaining data left in internal buffers. Since zstd data consists
+of one or more independent frames, the compressor object can still be used
+after this method is called.
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
-/*[clinic end generated code: output=b7cf2c8d64dcf2e3 input=bcf4671042aa4ab4]*/
+/*[clinic end generated code: output=b7cf2c8d64dcf2e3 input=a766870301932b85]*/
 {
     PyObject *ret;
 

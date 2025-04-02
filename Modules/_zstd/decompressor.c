@@ -664,15 +664,16 @@ _zstd.ZstdDecompressor.__init__
     options: object = None
         A dict object that contains advanced decompression parameters.
 
-A streaming decompressor, it stops after a frame is decompressed.
+Create a decompressor object for decompressing data incrementally.
 
-Thread-safe at method level.
+Thread-safe at method level. For one-shot decompression, use the decompress()
+function instead.
 [clinic start generated code]*/
 
 static int
 _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
                                      PyObject *zstd_dict, PyObject *options)
-/*[clinic end generated code: output=703af2f1ec226642 input=89434d93e8c2bd33]*/
+/*[clinic end generated code: output=703af2f1ec226642 input=8fd72999acc1a146]*/
 {
     /* Only called once */
     if (self->inited) {
@@ -755,16 +756,27 @@ _zstd.ZstdDecompressor.decompress
         output buffer is unlimited. When it is nonnegative, returns at
         most max_length bytes of decompressed data.
 
-Decompress data, return a chunk of decompressed data if possible, or b'' otherwise.
+Decompress *data*, returning uncompressed bytes if possible, or b'' otherwise.
 
-It stops after a frame is decompressed.
+If *max_length* is nonnegative, returns at most *max_length* bytes of
+decompressed data. If this limit is reached and further output can be
+produced, *self.needs_input* will be set to ``False``. In this case, the next
+call to *decompress()* may provide *data* as b'' to obtain more of the output.
+
+If all of the input data was decompressed and returned (either because this
+was less than *max_length* bytes, or because *max_length* was negative),
+*self.needs_input* will be set to True.
+
+Attempting to decompress data after the end of a frame is reached raises an
+EOFError. Any data found after the end of the frame is ignored and saved in
+the self.unused_data attribute.
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_ZstdDecompressor_decompress_impl(ZstdDecompressor *self,
                                        Py_buffer *data,
                                        Py_ssize_t max_length)
-/*[clinic end generated code: output=a4302b3c940dbec6 input=1be6c9b78a599c86]*/
+/*[clinic end generated code: output=a4302b3c940dbec6 input=16423de8f1c25985]*/
 {
     return stream_decompress(self, data, max_length, TYPE_DECOMPRESSOR);
 }
@@ -833,7 +845,7 @@ PyDoc_STRVAR(EndlessZstdDecompressor_doc,
 "Initialize an EndlessZstdDecompressor object.\n\n"
 "Parameters\n"
 "zstd_dict: A ZstdDict object, pre-trained zstd dictionary.\n"
-"option:    A dict object that contains advanced decompression parameters.");
+"options:   A dict object that contains advanced decompression parameters.");
 
 /*[clinic input]
 _zstd.EndlessZstdDecompressor.decompress
@@ -845,16 +857,17 @@ _zstd.EndlessZstdDecompressor.decompress
         output buffer is unlimited. When it is nonnegative, returns at
         most max_length bytes of decompressed data.
 
-Decompress data, return a chunk of decompressed data if possible, or b'' otherwise.
+Decompress *data*, returning uncompressed bytes if possible, or b'' otherwise.
 
-It stops after a frame is decompressed.
+The parameters are the same as ZstdDecompressor.decompress() method. Supports
+decompressing multiple frames unlike ZstdDecompressor.decompress().
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_EndlessZstdDecompressor_decompress_impl(ZstdDecompressor *self,
                                               Py_buffer *data,
                                               Py_ssize_t max_length)
-/*[clinic end generated code: output=319c125a794cae78 input=358442e527ffc63d]*/
+/*[clinic end generated code: output=319c125a794cae78 input=727e5a33726e73f0]*/
 {
     return stream_decompress(self, data, max_length, TYPE_ENDLESS_DECOMPRESSOR);
 }

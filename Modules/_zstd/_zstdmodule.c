@@ -450,12 +450,12 @@ _zstd.get_frame_size
 
 Get the size of a zstd frame, including frame header and 4-byte checksum if it has one.
 
-It will iterate all blocks' header within a frame, to accumulate the frame size.
+It will iterate all blocks' headers within a frame, to accumulate the frame size.
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_get_frame_size_impl(PyObject *module, Py_buffer *frame_buffer)
-/*[clinic end generated code: output=a7384c2f8780f442 input=56168aac3d162291]*/
+/*[clinic end generated code: output=a7384c2f8780f442 input=7d3ad24311893bf3]*/
 {
     size_t frame_size;
     PyObject *ret;
@@ -585,13 +585,18 @@ _zstd.compress
     zstd_dict: object  = None
         A ZstdDict object, a pre-trained zstd dictionary.
 
-Compress data, return a bytes object of zstd compressed data.
+Compress a block of data, return a bytes object of zstd compressed data.
+
+Refer to ZstdCompressor's docstring for a description of the
+optional arguments *level*, *options*, and *zstd_dict*.
+
+For incremental compression, use an ZstdCompressor instead.
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_compress_impl(PyObject *module, Py_buffer *data, PyObject *level,
                     PyObject *options, PyObject *zstd_dict)
-/*[clinic end generated code: output=0cca9399ca5c95cc input=b4d8b6d8c6b759fa]*/
+/*[clinic end generated code: output=0cca9399ca5c95cc input=e8a7c59073af923c]*/
 {
     STATE_FROM_MODULE(module);
     PyObject *ret = NULL;
@@ -657,15 +662,18 @@ _zstd.decompress
     options: object  = None
         A dict object that contains advanced decompression parameters.
 
-Decompress zstd data, return a bytes object.
+Decompress one or more frames of data.
 
-Supports multiple concatenated frames.
+Refer to ZstdDecompressor's docstring for a description of the
+optional arguments *zstd_dict*, *options*.
+
+For incremental decompression, use an ZstdDecompressor instead.
 [clinic start generated code]*/
 
 static PyObject *
 _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *zstd_dict,
                       PyObject *options)
-/*[clinic end generated code: output=2e8423588fb3b178 input=ef9c89023042d0f9]*/
+/*[clinic end generated code: output=2e8423588fb3b178 input=c18346e620e59039]*/
 {
     uint64_t decompressed_size;
     Py_ssize_t initial_size;

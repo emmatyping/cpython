@@ -14,14 +14,15 @@ PyDoc_STRVAR(_zstd_ZstdDecompressor___init____doc__,
 "ZstdDecompressor(zstd_dict=None, options=None)\n"
 "--\n"
 "\n"
-"A streaming decompressor, it stops after a frame is decompressed.\n"
+"Create a decompressor object for decompressing data incrementally.\n"
 "\n"
 "  zstd_dict\n"
 "    A ZstdDict object, a pre-trained zstd dictionary.\n"
 "  options\n"
 "    A dict object that contains advanced decompression parameters.\n"
 "\n"
-"Thread-safe at method level.");
+"Thread-safe at method level. For one-shot decompression, use the decompress()\n"
+"function instead.");
 
 static int
 _zstd_ZstdDecompressor___init___impl(ZstdDecompressor *self,
@@ -124,7 +125,7 @@ PyDoc_STRVAR(_zstd_ZstdDecompressor_decompress__doc__,
 "decompress($self, /, data, max_length=-1)\n"
 "--\n"
 "\n"
-"Decompress data, return a chunk of decompressed data if possible, or b\'\' otherwise.\n"
+"Decompress *data*, returning uncompressed bytes if possible, or b\'\' otherwise.\n"
 "\n"
 "  data\n"
 "    A bytes-like object, zstd data to be decompressed.\n"
@@ -133,7 +134,18 @@ PyDoc_STRVAR(_zstd_ZstdDecompressor_decompress__doc__,
 "    output buffer is unlimited. When it is nonnegative, returns at\n"
 "    most max_length bytes of decompressed data.\n"
 "\n"
-"It stops after a frame is decompressed.");
+"If *max_length* is nonnegative, returns at most *max_length* bytes of\n"
+"decompressed data. If this limit is reached and further output can be\n"
+"produced, *self.needs_input* will be set to ``False``. In this case, the next\n"
+"call to *decompress()* may provide *data* as b\'\' to obtain more of the output.\n"
+"\n"
+"If all of the input data was decompressed and returned (either because this\n"
+"was less than *max_length* bytes, or because *max_length* was negative),\n"
+"*self.needs_input* will be set to True.\n"
+"\n"
+"Attempting to decompress data after the end of a frame is reached raises an\n"
+"EOFError. Any data found after the end of the frame is ignored and saved in\n"
+"the self.unused_data attribute.");
 
 #define _ZSTD_ZSTDDECOMPRESSOR_DECOMPRESS_METHODDEF    \
     {"decompress", _PyCFunction_CAST(_zstd_ZstdDecompressor_decompress), METH_FASTCALL|METH_KEYWORDS, _zstd_ZstdDecompressor_decompress__doc__},
@@ -216,7 +228,7 @@ PyDoc_STRVAR(_zstd_EndlessZstdDecompressor_decompress__doc__,
 "decompress($self, /, data, max_length=-1)\n"
 "--\n"
 "\n"
-"Decompress data, return a chunk of decompressed data if possible, or b\'\' otherwise.\n"
+"Decompress *data*, returning uncompressed bytes if possible, or b\'\' otherwise.\n"
 "\n"
 "  data\n"
 "    A bytes-like object, zstd data to be decompressed.\n"
@@ -225,7 +237,8 @@ PyDoc_STRVAR(_zstd_EndlessZstdDecompressor_decompress__doc__,
 "    output buffer is unlimited. When it is nonnegative, returns at\n"
 "    most max_length bytes of decompressed data.\n"
 "\n"
-"It stops after a frame is decompressed.");
+"The parameters are the same as ZstdDecompressor.decompress() method. Supports\n"
+"decompressing multiple frames unlike ZstdDecompressor.decompress().");
 
 #define _ZSTD_ENDLESSZSTDDECOMPRESSOR_DECOMPRESS_METHODDEF    \
     {"decompress", _PyCFunction_CAST(_zstd_EndlessZstdDecompressor_decompress), METH_FASTCALL|METH_KEYWORDS, _zstd_EndlessZstdDecompressor_decompress__doc__},
@@ -303,4 +316,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=0522b30bb855c82e input=a9049054013a1b77]*/
+/*[clinic end generated code: output=f43c582df9e05267 input=a9049054013a1b77]*/

@@ -31,17 +31,17 @@ TODOs:
 10. ~~Documentation~~
 11. ~~Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)~~ handled by compression._common.streams.BaseStream, see the `test_read_multistream` test.
 12. ~~Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)~~ with/iter exercised in `test_iterator`. Verified it matches the shape of BufferedIOBase.
-13. Draft PEP
+13. ~~Draft PEP~~
 
 After-PEP posting:
 1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
 2. TODOs in code base
-3. Go over class `__init__`/class docs to see if they should be refactored
+3. ~~Go over class `__init__`/class docs to see if they should be refactored~~
 4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files). Still not sure how to add zstd properly to cpython-source-deps
-5. Add docs for CParameter/DParameter
-6. Add test for method 20 reading to test_zipfile
-7. Add deprecations for existing compression libraries
-8. Defaults and more tests for threading
+5. Add test for method 20 reading to test_zipfile
+6. Defaults and more tests for threading
+7. Add docs for CParameter/DParameter
+8. Add deprecations for existing compression libraries
 9. Fuzzing (upstream libfuzzer integration and use it)
 
 PEP/Review open questions:
