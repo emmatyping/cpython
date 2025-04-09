@@ -306,12 +306,6 @@ _zstd_ZstdCompressor_new(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject
     /* Last mode */
     self->last_mode = ZSTD_e_end;
 
-    /* Thread lock */
-    self->lock = PyThread_allocate_lock();
-    if (self->lock == NULL) {
-        PyErr_NoMemory();
-        goto error;
-    }
     return (PyObject*)self;
 
 error:
@@ -329,8 +323,8 @@ ZstdCompressor_dealloc(ZstdCompressor *self)
     Py_XDECREF(self->dict);
 
     /* Thread lock */
-    if (self->lock) {
-        PyThread_free_lock(self->lock);
+    if (PyMutex_IsLocked(&self->lock)) {
+        PyMutex_Unlock(&self->lock);
     }
 
     PyTypeObject *tp = Py_TYPE(self);

@@ -49,12 +49,6 @@ _zstd_ZstdDict_new(PyTypeObject *type, PyObject *Py_UNUSED(args), PyObject *Py_U
         goto error;
     }
 
-    /* Thread lock */
-    self->lock = PyThread_allocate_lock();
-    if (self->lock == NULL) {
-        PyErr_NoMemory();
-        goto error;
-    }
     return (PyObject*)self;
 
 error:
@@ -74,9 +68,9 @@ ZstdDict_dealloc(ZstdDict *self)
     /* Release dict_content after Free ZSTD_CDict/ZSTD_DDict instances */
     Py_XDECREF(self->dict_content);
 
-    /* Free thread lock */
-    if (self->lock) {
-        PyThread_free_lock(self->lock);
+    /* Thread lock */
+    if (PyMutex_IsLocked(&self->lock)) {
+        PyMutex_Unlock(&self->lock);
     }
 
     PyTypeObject *tp = Py_TYPE(self);

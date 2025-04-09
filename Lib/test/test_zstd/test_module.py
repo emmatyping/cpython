@@ -9,9 +9,14 @@ import re
 import os
 import unittest
 import tempfile
+import threading
+
 from compression._common import streams
+
 from test.support.import_helper import import_module
+from test.support import threading_helper
 from test.support import _1M
+from test.support import Py_GIL_DISABLED
 
 zstd = import_module("compression.zstd")
 _zstd = import_module("_zstd")
@@ -3002,6 +3007,82 @@ class OpenTestCase(unittest.TestCase):
         with open(io.BytesIO(), "wb") as f:
             self.assertEqual(f.write(arr), LENGTH)
             self.assertEqual(f.tell(), LENGTH)
+
+class FreeThreadingMethodTests(unittest.TestCase):
+
+    @unittest.skipUnless(Py_GIL_DISABLED, 'this test can only possibly fail with GIL disabled')
+    @threading_helper.reap_threads
+    @threading_helper.requires_working_threading()
+    def test_compress_locking(self):
+        input = b'a'* (16*_1K)
+        num_threads = 8
+
+        comp = ZstdCompressor()
+        parts = []
+        for _ in range(num_threads):
+            res = comp.compress(input, ZstdCompressor.FLUSH_BLOCK)
+            if res:
+                parts.append(res)
+        rest1 = comp.flush()
+        expected = b''.join(parts) + rest1
+
+        comp = ZstdCompressor()
+        output = []
+        def run_method(method, input_data, output_data):
+            res = method(input_data, ZstdCompressor.FLUSH_BLOCK)
+            if res:
+                output_data.append(res)
+        threads = []
+
+        for i in range(num_threads):
+            thread = threading.Thread(target=run_method, args=(comp.compress, input, output))
+
+            threads.append(thread)
+
+        with threading_helper.start_threads(threads):
+            pass
+
+        rest2 = comp.flush()
+        self.assertEqual(rest1, rest2)
+        actual = b''.join(output) + rest2
+        self.assertEqual(expected, actual)
+
+    @unittest.skipUnless(Py_GIL_DISABLED, 'this test can only possibly fail with GIL disabled')
+    @threading_helper.reap_threads
+    @threading_helper.requires_working_threading()
+    def test_decompress_locking(self):
+        input = compress(b'a'* (16*_1K))
+        num_threads = 8
+        # to ensure we decompress over multiple calls, set maxsize
+        window_size = _1K * 16//num_threads
+
+        decomp = ZstdDecompressor()
+        parts = []
+        for _ in range(num_threads):
+            res = decomp.decompress(input, window_size)
+            if res:
+                parts.append(res)
+        expected = b''.join(parts)
+
+        comp = ZstdDecompressor()
+        output = []
+        def run_method(method, input_data, output_data):
+            res = method(input_data, window_size)
+            if res:
+                output_data.append(res)
+        threads = []
+
+        for i in range(num_threads):
+            thread = threading.Thread(target=run_method, args=(comp.decompress, input, output))
+
+            threads.append(thread)
+
+        with threading_helper.start_threads(threads):
+            pass
+
+        actual = b''.join(output)
+        self.assertEqual(expected, actual)
+
 
 
 if __name__ == "__main__":

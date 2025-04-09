@@ -14,6 +14,8 @@ Refactored for the CPython standard library by Emma Harper Smith.
 #include "zstd.h"
 #include "zdict.h"
 
+#include "pycore_lock.h"
+
 #if ZSTD_VERSION_NUMBER < 10405
     #error "_zstd module requires zstd v1.4.5+"
 #endif
@@ -34,22 +36,17 @@ get_zstd_state(PyTypeObject *type) {
 /* ------------------
      Global macro
    ------------------ */
-#define ACQUIRE_LOCK(obj) do {                    \
-if (!PyThread_acquire_lock((obj)->lock, 0)) { \
-    Py_BEGIN_ALLOW_THREADS                    \
-    PyThread_acquire_lock((obj)->lock, 1);    \
-    Py_END_ALLOW_THREADS                      \
-} } while (0)
-#define RELEASE_LOCK(obj) PyThread_release_lock((obj)->lock)
+#define ACQUIRE_LOCK(obj) PyMutex_Lock(&obj->lock)
+#define RELEASE_LOCK(obj) PyMutex_Unlock(&obj->lock)
 
 /* Get module state from a class type, and set it to supported object.
     Used in Py_tp_new or Py_tp_init. */
-#define SET_STATE_TO_OBJ(type, obj) \
-    do {                                                                \
-        (obj)->module_state = get_zstd_state(type);\
-        if ((obj)->module_state == NULL) {                              \
-            goto error;                                                 \
-        }                                                               \
+#define SET_STATE_TO_OBJ(type, obj)                    \
+    do {                                               \
+        (obj)->module_state = get_zstd_state(type);    \
+        if ((obj)->module_state == NULL) {             \
+            goto error;                                \
+        }                                              \
     } while (0)
 /* Get module state from module object */
 #define STATE_FROM_MODULE(module) \
@@ -93,7 +90,7 @@ typedef struct {
     PyObject_HEAD
 
     /* Thread lock for generating ZSTD_CDict/ZSTD_DDict */
-    PyThread_type_lock lock;
+    PyMutex lock;
 
     /* Reusable compress/decompress dictionary, they are created once and
        can be shared by multiple threads concurrently, since its usage is
@@ -117,7 +114,7 @@ typedef struct {
     PyObject_HEAD
 
     /* Thread lock for compressing */
-    PyThread_type_lock lock;
+    PyMutex lock;
 
     /* Compression context */
     ZSTD_CCtx *cctx;
@@ -144,7 +141,7 @@ typedef struct {
     PyObject_HEAD
 
     /* Thread lock for compressing */
-    PyThread_type_lock lock;
+    PyMutex lock;
 
     /* Decompression context */
     ZSTD_DCtx *dctx;

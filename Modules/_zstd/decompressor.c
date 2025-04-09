@@ -618,12 +618,6 @@ _zstd_ZstdDecompressor_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         goto error;
     }
 
-    /* Thread lock */
-    self->lock = PyThread_allocate_lock();
-    if (self->lock == NULL) {
-        PyErr_NoMemory();
-        goto error;
-    }
     return (PyObject*)self;
 
 error:
@@ -646,9 +640,9 @@ ZstdDecompressor_dealloc(ZstdDecompressor *self)
     /* Free unused data */
     Py_XDECREF(self->unused_data);
 
-    /* Free thread lock */
-    if (self->lock) {
-        PyThread_free_lock(self->lock);
+    /* Thread lock */
+    if (PyMutex_IsLocked(&self->lock)) {
+        PyMutex_Unlock(&self->lock);
     }
 
     PyTypeObject *tp = Py_TYPE(self);
