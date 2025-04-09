@@ -16,36 +16,3 @@ This module is based on the `pyzstd` project.
 10. ZstdFileReader and ZstdFileWriter were removed as ZstdFile is implemented in Python
 11. `_set_pledged_input_size`, `_reset_session`, and `(de)compress_stream` were all removed
 12. `ZstdDict.as_prefix` is removed, to keep the initial API simpler.
-
-
-TODOs:
-1. ~~Add pyzstd license~~
-2. ~~Remove seekable_zstdfile~~
-3. ~~Make and use `compression` namespace a la hashlib (and re-export other compression formats)~~
-4. ~~Set thread defaults~~
-5. ~~More tests!~~
-6. ~~Remove `_set_pledged_input_size`~~
-7. ~~Remove `_reset_session`~~
-8. ~~Remove `(de)compress_stream`~~
-9. ~~Add integrations with other modules (i.e. zipfile, tarfile, shutil)~~
-10. ~~Documentation~~
-11. ~~Go over zstdfile and make sure it supports multiple frames concatenated together (might need to use `EndlessZstdDecompressor`)~~ handled by compression._common.streams.BaseStream, see the `test_read_multistream` test.
-12. ~~Ensure docs on zstdfile matching BufferedIOBase is correct (i.e. with/iteration/list of methods)~~ with/iter exercised in `test_iterator`. Verified it matches the shape of BufferedIOBase.
-13. ~~Draft PEP~~
-
-After-PEP posting:
-1. Ask about compile guard for OUTPUT_BUFFER_MAX_BLOCK_SIZE ?
-2. ~~TODOs in code base~~
-3. ~~Go over class `__init__`/class docs to see if they should be refactored~~
-4. Windows build system support (ref https://devguide.python.org/developer-workflow/extension-modules/#updating-msvc-project-files). Still not sure how to add zstd properly to cpython-source-deps/PCbuild system
-5. Add test for method 20 reading to test_zipfile
-6. Defaults and more tests for threading
-7. Add docs for CParameter/DParameter
-8. Add deprecations for existing compression libraries
-9. ~~Fuzzing (upstream libfuzzer integration and use it)~~ Upstream already is fuzzed via oss-fuzz. Should investigate in a follow up if this is possible to add.
-
-PEP/Review open questions:
-1. When to deprecate `import lzma` etc?
-2. Should we remove `EndlessZstdDecompressor`? (leaning towards yes)
-3. Should arguments (i.e. options) be made more Pythonic? If so, how? (should `level` be renamed to `compresslevel`?)
-4. Should the compressor only be able to handle a single frame? The underlying APIs allow compressing more than one frame.
