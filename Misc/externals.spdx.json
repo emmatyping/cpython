@@ -190,6 +190,27 @@
       "name": "zlib",
       "primaryPackagePurpose": "SOURCE",
       "versionInfo": "1.3.1"
+    },
+    {
+      "SPDXID": "SPDXRef-PACKAGE-zstd",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "18a768d65c74bf6ea495c882e3709e66cbcd0d324cf29b06f5090cfe5b999596"
+        }
+      ],
+      "downloadLocation": "https://github.com/emmatyping/cpython-source-deps/archive/refs/tags/zstd-1.5.7.tar.gz",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:facebook:zstandard:1.5.7:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        }
+      ],
+      "licenseConcluded": "BSD-3-Clause",
+      "name": "zstd",
+      "primaryPackagePurpose": "SOURCE",
+      "versionInfo": "1.5.7"
     }
   ],
   "spdxVersion": "SPDX-2.3"
