@@ -63,9 +63,6 @@ ZIP_STORED = 0
 ZIP_DEFLATED = 8
 ZIP_BZIP2 = 12
 ZIP_LZMA = 14
-# PKWARE originally chose 20 instead of 93
-# we want to support extracting both (only writing method 93)
-_ZIP_ZSTANDARD_PKWARE = 20
 ZIP_ZSTANDARD = 93
 # Other ZIP compression methods not supported
 
@@ -515,7 +512,7 @@ class ZipInfo:
             min_version = max(BZIP2_VERSION, min_version)
         elif self.compress_type == ZIP_LZMA:
             min_version = max(LZMA_VERSION, min_version)
-        elif self.compress_type in (ZIP_ZSTANDARD, _ZIP_ZSTANDARD_PKWARE) :
+        elif self.compress_type == ZIP_ZSTANDARD:
             min_version = max(ZSTANDARD_VERSION, min_version)
 
         self.extract_version = max(min_version, self.extract_version)
@@ -798,7 +795,7 @@ def _check_compression(compression):
         if not lzma:
             raise RuntimeError(
                 "Compression requires the (missing) lzma module")
-    elif compression in (ZIP_ZSTANDARD, _ZIP_ZSTANDARD_PKWARE):
+    elif compression == ZIP_ZSTANDARD:
         if not zstd:
             raise RuntimeError(
                 "Compression requires the (missing) compression.zstd module")
@@ -820,9 +817,6 @@ def _get_compressor(compress_type, compresslevel=None):
         return LZMACompressor()
     elif compress_type == ZIP_ZSTANDARD:
         return zstd.ZstdCompressor()
-    elif compress_type == _ZIP_ZSTANDARD_PKWARE:
-        raise  ValueError("The method _ZIP_ZSTANDARD_PKWARE is deprecated "
-                          "and should not be used. Use ZIP_ZSTANDARD instead.")
     else:
         return None
 
@@ -837,7 +831,7 @@ def _get_decompressor(compress_type):
         return bz2.BZ2Decompressor()
     elif compress_type == ZIP_LZMA:
         return LZMADecompressor()
-    elif compress_type in (ZIP_ZSTANDARD, _ZIP_ZSTANDARD_PKWARE):
+    elif compress_type == ZIP_ZSTANDARD:
         return zstd.ZstdDecompressor()
     else:
         descr = compressor_names.get(compress_type)
