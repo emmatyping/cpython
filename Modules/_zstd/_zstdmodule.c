@@ -735,7 +735,7 @@ _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *zstd_dict,
     if (self.at_frame_edge == 0) {
         char *extra_msg = (Py_SIZE(ret) == 0) ? "." :
                             ", if want to output these decompressed data, use "
-                            "the EndlessZstdDecompressor class to decompress.";
+                            "the ZstdDecompressor class to decompress.";
         PyErr_Format(MS_MEMBER(ZstdError),
                         "Decompression failed: zstd data ends in an incomplete "
                         "frame, maybe the input data was truncated. Decompressed "
@@ -1045,14 +1045,6 @@ static int _zstd_exec(PyObject *module) {
         return -1;
     }
 
-    // EndlessZstdDecompressor
-    if (add_type_to_module(module,
-                           "EndlessZstdDecompressor",
-                           &EndlessZstdDecompressor_type_spec,
-                           &MS_MEMBER(EndlessZstdDecompressor_type)) < 0) {
-        return -1;
-    }
-
     return 0;
 }
 
@@ -1072,7 +1064,6 @@ _zstd_traverse(PyObject *module, visitproc visit, void *arg)
     Py_VISIT(MS_MEMBER(ZstdCompressor_type));
 
     Py_VISIT(MS_MEMBER(ZstdDecompressor_type));
-    Py_VISIT(MS_MEMBER(EndlessZstdDecompressor_type));
 
     Py_VISIT(MS_MEMBER(ZstdError));
 
@@ -1097,7 +1088,6 @@ _zstd_clear(PyObject *module)
     Py_CLEAR(MS_MEMBER(ZstdCompressor_type));
 
     Py_CLEAR(MS_MEMBER(ZstdDecompressor_type));
-    Py_CLEAR(MS_MEMBER(EndlessZstdDecompressor_type));
 
     Py_CLEAR(MS_MEMBER(ZstdError));
 

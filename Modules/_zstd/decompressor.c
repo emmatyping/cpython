@@ -6,14 +6,13 @@ Original implementation by Ma Lin with patches by Rogdham.
 Refactored for the CPython standard library by Emma Harper Smith.
 */
 
-/* ZstdDecompressor and EndlessZstdDecompressor class definitions */
+/* ZstdDecompressor class definition */
 
 /*[clinic input]
 module _zstd
 class _zstd.ZstdDecompressor "ZstdDecompressor *" "clinic_state()->ZstdDecompressor_type"
-class _zstd.EndlessZstdDecompressor "ZstdDecompressor *" "clinic_state()->EndlessZstdDecompressor_type"
 [clinic start generated code]*/
-/*[clinic end generated code: output=da39a3ee5e6b4b0d input=d3ec20d7a04d24b1]*/
+/*[clinic end generated code: output=da39a3ee5e6b4b0d input=4e6eae327c0c0c76]*/
 
 #ifndef Py_BUILD_CORE_BUILTIN
 #  define Py_BUILD_CORE_MODULE 1
@@ -203,7 +202,7 @@ load:
 
         typedef enum {
             TYPE_DECOMPRESSOR,          // <D>, ZstdDecompressor class
-            TYPE_ENDLESS_DECOMPRESSOR,  // <E>, EndlessZstdDecompressor class
+            TYPE_ENDLESS_DECOMPRESSOR,  // <E>, decompress() function
         } decompress_type;
 
     Decompress implementation for <D>, <E>, pseudo code:
@@ -311,7 +310,7 @@ decompress_impl(ZstdDecompressor *self, ZSTD_inBuffer *in,
                 break;
             }
         } else if (type == TYPE_ENDLESS_DECOMPRESSOR) {
-            /* EndlessZstdDecompressor class supports multiple frames */
+            /* decompress() function supports multiple frames */
             self->at_frame_edge = (zstd_ret == 0) ? 1 : 0;
 
             /* The second AFE check for setting .at_frame_edge flag */
@@ -826,80 +825,4 @@ PyType_Spec ZstdDecompressor_type_spec = {
     .basicsize = sizeof(ZstdDecompressor),
     .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .slots = ZstdDecompressor_slots,
-};
-
-/* -------------------------------
-    EndlessZstdDecompressor code
-    ------------------------------- */
-PyDoc_STRVAR(EndlessZstdDecompressor_doc,
-"A streaming decompressor, accepts multiple concatenated frames.\n"
-"Thread-safe at method level.\n\n"
-"EndlessZstdDecompressor.__init__(self, zstd_dict=None, option=None)\n"
-"----\n"
-"Initialize an EndlessZstdDecompressor object.\n\n"
-"Parameters\n"
-"zstd_dict: A ZstdDict object, pre-trained zstd dictionary.\n"
-"options:   A dict object that contains advanced decompression parameters.");
-
-/*[clinic input]
-_zstd.EndlessZstdDecompressor.decompress
-
-    data: Py_buffer
-        A bytes-like object, zstd data to be decompressed.
-    max_length: Py_ssize_t = -1
-        Maximum size of returned data. When it is negative, the size of
-        output buffer is unlimited. When it is nonnegative, returns at
-        most max_length bytes of decompressed data.
-
-Decompress *data*, returning uncompressed bytes if possible, or b'' otherwise.
-
-The parameters are the same as ZstdDecompressor.decompress() method. Supports
-decompressing multiple frames unlike ZstdDecompressor.decompress().
-[clinic start generated code]*/
-
-static PyObject *
-_zstd_EndlessZstdDecompressor_decompress_impl(ZstdDecompressor *self,
-                                              Py_buffer *data,
-                                              Py_ssize_t max_length)
-/*[clinic end generated code: output=319c125a794cae78 input=727e5a33726e73f0]*/
-{
-    return stream_decompress(self, data, max_length, TYPE_ENDLESS_DECOMPRESSOR);
-}
-
-static PyMethodDef EndlessZstdDecompressor_methods[] = {
-    _ZSTD_ENDLESSZSTDDECOMPRESSOR_DECOMPRESS_METHODDEF
-
-    {0}
-};
-
-PyDoc_STRVAR(EndlessZstdDecompressor_at_frame_edge_doc,
-"True when both the input and output streams are at a frame edge, means a frame is\n"
-"completely decoded and fully flushed, or the decompressor just be initialized.\n\n"
-"This flag could be used to check data integrity in some cases.");
-
-static PyMemberDef EndlessZstdDecompressor_members[] = {
-    {"at_frame_edge", Py_T_BOOL, offsetof(ZstdDecompressor, at_frame_edge),
-    Py_READONLY, EndlessZstdDecompressor_at_frame_edge_doc},
-
-    {"needs_input", Py_T_BOOL, offsetof(ZstdDecompressor, needs_input),
-    Py_READONLY, ZstdDecompressor_needs_input_doc},
-
-    {0}
-};
-
-static PyType_Slot EndlessZstdDecompressor_slots[] = {
-    {Py_tp_new, _zstd_ZstdDecompressor_new},
-    {Py_tp_dealloc, ZstdDecompressor_dealloc},
-    {Py_tp_init, _zstd_ZstdDecompressor___init__},
-    {Py_tp_methods, EndlessZstdDecompressor_methods},
-    {Py_tp_members, EndlessZstdDecompressor_members},
-    {Py_tp_doc, (char*)EndlessZstdDecompressor_doc},
-    {0}
-};
-
-PyType_Spec EndlessZstdDecompressor_type_spec = {
-    .name = "_zstd.EndlessZstdDecompressor",
-    .basicsize = sizeof(ZstdDecompressor),
-    .flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .slots = EndlessZstdDecompressor_slots,
 };

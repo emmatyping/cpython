@@ -66,7 +66,6 @@ get_zstd_state(PyTypeObject *type) {
 extern PyType_Spec zstddict_type_spec;
 extern PyType_Spec zstdcompressor_type_spec;
 extern PyType_Spec ZstdDecompressor_type_spec;
-extern PyType_Spec EndlessZstdDecompressor_type_spec;
 
 struct _zstd_state {
     PyObject *empty_bytes;
@@ -79,7 +78,6 @@ struct _zstd_state {
     PyTypeObject *ZstdDict_type;
     PyTypeObject *ZstdCompressor_type;
     PyTypeObject *ZstdDecompressor_type;
-    PyTypeObject *EndlessZstdDecompressor_type;
     PyObject *ZstdError;
 
     PyTypeObject *CParameter_type;
@@ -160,7 +158,7 @@ typedef struct {
     /* 0 if decompressor has (or may has) unconsumed input data, 0 or 1. */
     char needs_input;
 
-    /* For EndlessZstdDecompressor, 0 or 1.
+    /* For decompress(), 0 or 1.
        1 when both input and output streams are at a frame edge, means a
        frame is completely decoded and fully flushed, or the decompressor
        just be initialized. */
@@ -182,7 +180,7 @@ typedef struct {
 
 typedef enum {
     TYPE_DECOMPRESSOR,          // <D>, ZstdDecompressor class
-    TYPE_ENDLESS_DECOMPRESSOR,  // <E>, EndlessZstdDecompressor class
+    TYPE_ENDLESS_DECOMPRESSOR,  // <E>, decompress() function
 } decompress_type;
 
 typedef enum {

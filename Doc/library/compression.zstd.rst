@@ -216,8 +216,8 @@ Compressing and decompressing data in memory
    .. note::
       This class does not transparently handle inputs containing multiple
       compressed frames, unlike :func:`decompress` and :class:`ZstdFile`. To
-      decompress a multi-stream input, you should use
-      :class:`EndlessZstdDecompressor`.
+      decompress a multi-stream input, you should use :func:`decompress` or
+      :class:`ZstdFile` if working with a :term:`file object`.
 
    .. method:: decompress(data, max_length=-1)
 
@@ -252,46 +252,6 @@ Compressing and decompressing data in memory
       Data found after the end of the compressed stream.
 
       Before the end of the stream is reached, this will be ``b""``.
-
-   .. attribute:: needs_input
-
-      ``False`` if the :meth:`.decompress` method can provide more
-      decompressed data before requiring new uncompressed input.
-
-.. class:: EndlessZstdDecompressor(zstd_dict=None, options=None)
-
-   Create a decompressor object, which can be used to decompress data
-   incrementally.
-
-   Unlike :class:`ZstdDecompressor`, this class handles the decompression of
-   multiple frames.
-
-   .. method:: decompress(data, max_length=-1)
-
-      Decompress *data* (a :term:`bytes-like object`), returning
-      uncompressed data as bytes. Some of *data* may be buffered
-      internally, for use in later calls to :meth:`decompress`. The
-      returned data should be concatenated with the output of any
-      previous calls to :meth:`decompress`.
-
-      If *max_length* is nonnegative, returns at most *max_length*
-      bytes of decompressed data. If this limit is reached and further
-      output can be produced, the :attr:`~.needs_input` attribute will
-      be set to ``False``. In this case, the next call to
-      :meth:`~.decompress` may provide *data* as ``b''`` to obtain
-      more of the output.
-
-      If all of the input data was decompressed and returned (either
-      because this was less than *max_length* bytes, or because
-      *max_length* was negative), the :attr:`~.needs_input` attribute
-      will be set to ``True``.
-
-      Attempting to decompress data after the end of stream is reached
-      raises an :exc:`EOFError`.
-
-   .. attribute:: eof
-
-      ``True`` if the end-of-stream marker has been reached.
 
    .. attribute:: needs_input
 

@@ -16,7 +16,6 @@ __all__ = (  # From this file
     # From _zstd
     "ZstdCompressor",
     "ZstdDecompressor",
-    "EndlessZstdDecompressor",
     "ZstdDict",
     "ZstdError",
     "compress",
