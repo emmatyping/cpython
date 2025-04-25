@@ -35,11 +35,9 @@ from compression.zstd import (
     get_frame_size,
     finalize_dict,
     train_dict,
-    CParameter,
-    DParameter,
-    Strategy,
     ZstdFile,
     zstd_support_multithread,
+    get_param_bounds,
 )
 from compression.zstd.zstdfile import open
 
@@ -78,7 +76,7 @@ def setUpModule():
     DAT_130K_D = bytes([random.randint(0, 127) for _ in range(130*1024)])
 
     global DAT_130K_C
-    DAT_130K_C = compress(DAT_130K_D, options={CParameter.checksumFlag:1})
+    DAT_130K_C = compress(DAT_130K_D, options={zstd.checksumFlag:1})
 
     global DECOMPRESSED_DAT
     DECOMPRESSED_DAT = b'abcdefg123456' * 1000
@@ -301,53 +299,42 @@ class ClassShapeTestCase(unittest.TestCase):
         class SubClass(ZstdDict):
             pass
 
-    def test_Strategy(self):
-        # class attributes
-        Strategy.fast
-        Strategy.dfast
-        Strategy.greedy
-        Strategy.lazy
-        Strategy.lazy2
-        Strategy.btlazy2
-        Strategy.btopt
-        Strategy.btultra
-        Strategy.btultra2
 
-    def test_CParameter(self):
-        CParameter.compressionLevel
-        CParameter.windowLog
-        CParameter.hashLog
-        CParameter.chainLog
-        CParameter.searchLog
-        CParameter.minMatch
-        CParameter.targetLength
-        CParameter.strategy
-        with self.assertRaises(NotImplementedError):
-            CParameter.targetCBlockSize
+    def test_compression_parameters(self):
+        zstd.compressionLevel
+        zstd.windowLog
+        zstd.hashLog
+        zstd.chainLog
+        zstd.searchLog
+        zstd.minMatch
+        zstd.targetLength
+        zstd.strategy
+        with self.assertRaises(AttributeError):
+            zstd.targetCBlockSize
 
-        CParameter.enableLongDistanceMatching
-        CParameter.ldmHashLog
-        CParameter.ldmMinMatch
-        CParameter.ldmBucketSizeLog
-        CParameter.ldmHashRateLog
+        zstd.enableLongDistanceMatching
+        zstd.ldmHashLog
+        zstd.ldmMinMatch
+        zstd.ldmBucketSizeLog
+        zstd.ldmHashRateLog
 
-        CParameter.contentSizeFlag
-        CParameter.checksumFlag
-        CParameter.dictIDFlag
+        zstd.contentSizeFlag
+        zstd.checksumFlag
+        zstd.dictIDFlag
 
-        CParameter.nbWorkers
-        CParameter.jobSize
-        CParameter.overlapLog
+        zstd.nbWorkers
+        zstd.jobSize
+        zstd.overlapLog
 
-        t = CParameter.windowLog.bounds()
+        t = get_param_bounds(True, zstd.windowLog)
         self.assertEqual(len(t), 2)
         self.assertEqual(type(t[0]), int)
         self.assertEqual(type(t[1]), int)
 
-    def test_DParameter(self):
-        DParameter.windowLogMax
+    def test_decompression_parameters(self):
+        zstd.windowLogMax
 
-        t = DParameter.windowLogMax.bounds()
+        t = get_param_bounds(False, zstd.windowLogMax)
         self.assertEqual(len(t), 2)
         self.assertEqual(type(t[0]), int)
         self.assertEqual(type(t[1]), int)
@@ -393,7 +380,7 @@ class CompressorTestCase(unittest.TestCase):
             ZstdCompressor(options={2**31: 100})
 
         with self.assertRaises(ZstdError):
-            ZstdCompressor(options={CParameter.windowLog: 100})
+            ZstdCompressor(options={zstd.windowLog: 100})
         with self.assertRaises(ZstdError):
             ZstdCompressor(options={3333: 100})
 
@@ -419,55 +406,55 @@ class CompressorTestCase(unittest.TestCase):
         zc.flush(zc.FLUSH_FRAME)
 
     def test_compress_parameters(self):
-        d = {CParameter.compressionLevel : 10,
+        d = {zstd.compressionLevel : 10,
 
-             CParameter.windowLog : 12,
-             CParameter.hashLog : 10,
-             CParameter.chainLog : 12,
-             CParameter.searchLog : 12,
-             CParameter.minMatch : 4,
-             CParameter.targetLength : 12,
-             CParameter.strategy : Strategy.lazy,
+             zstd.windowLog : 12,
+             zstd.hashLog : 10,
+             zstd.chainLog : 12,
+             zstd.searchLog : 12,
+             zstd.minMatch : 4,
+             zstd.targetLength : 12,
+             zstd.strategy : zstd.ZSTD_lazy,
 
-             CParameter.enableLongDistanceMatching : 1,
-             CParameter.ldmHashLog : 12,
-             CParameter.ldmMinMatch : 11,
-             CParameter.ldmBucketSizeLog : 5,
-             CParameter.ldmHashRateLog : 12,
+             zstd.enableLongDistanceMatching : 1,
+             zstd.ldmHashLog : 12,
+             zstd.ldmMinMatch : 11,
+             zstd.ldmBucketSizeLog : 5,
+             zstd.ldmHashRateLog : 12,
 
-             CParameter.contentSizeFlag : 1,
-             CParameter.checksumFlag : 1,
-             CParameter.dictIDFlag : 0,
+             zstd.contentSizeFlag : 1,
+             zstd.checksumFlag : 1,
+             zstd.dictIDFlag : 0,
 
-             CParameter.nbWorkers : 2 if zstd_support_multithread else 0,
-             CParameter.jobSize : 5*_1M if zstd_support_multithread else 0,
-             CParameter.overlapLog : 9 if zstd_support_multithread else 0,
+             zstd.nbWorkers : 2 if zstd_support_multithread else 0,
+             zstd.jobSize : 5*_1M if zstd_support_multithread else 0,
+             zstd.overlapLog : 9 if zstd_support_multithread else 0,
              }
         ZstdCompressor(options=d)
 
         # larger than signed int, ValueError
         d1 = d.copy()
-        d1[CParameter.ldmBucketSizeLog] = 2**31
+        d1[zstd.ldmBucketSizeLog] = 2**31
         self.assertRaises(ValueError, ZstdCompressor, d1)
 
         # clamp compressionLevel
         compress(b'', compressionLevel_values.max+1)
         compress(b'', compressionLevel_values.min-1)
 
-        compress(b'', {CParameter.compressionLevel:compressionLevel_values.max+1})
-        compress(b'', {CParameter.compressionLevel:compressionLevel_values.min-1})
+        compress(b'', {zstd.compressionLevel:compressionLevel_values.max+1})
+        compress(b'', {zstd.compressionLevel:compressionLevel_values.min-1})
 
         # zstd lib doesn't support MT compression
         if not zstd_support_multithread:
             with self.assertRaises(ZstdError):
-                ZstdCompressor({CParameter.nbWorkers:4})
+                ZstdCompressor({zstd.nbWorkers:4})
             with self.assertRaises(ZstdError):
-                ZstdCompressor({CParameter.jobSize:4})
+                ZstdCompressor({zstd.jobSize:4})
             with self.assertRaises(ZstdError):
-                ZstdCompressor({CParameter.overlapLog:4})
+                ZstdCompressor({zstd.overlapLog:4})
 
         # out of bounds error msg
-        option = {CParameter.windowLog:100}
+        option = {zstd.windowLog:100}
         with self.assertRaisesRegex(ZstdError,
                 (r'Error when setting zstd compression parameter "windowLog", '
                  r'it should \d+ <= value <= \d+, provided value is 100\. '
@@ -476,7 +463,7 @@ class CompressorTestCase(unittest.TestCase):
 
     def test_unknown_compression_parameter(self):
         KEY = 100001234
-        option = {CParameter.compressionLevel: 10,
+        option = {zstd.compressionLevel: 10,
                   KEY: 200000000}
         pattern = r'Zstd compression parameter.*?"unknown parameter \(key %d\)"' \
                   % KEY
@@ -489,8 +476,8 @@ class CompressorTestCase(unittest.TestCase):
         size = 40*_1M
         b = THIS_FILE_BYTES * (size // len(THIS_FILE_BYTES))
 
-        options = {CParameter.compressionLevel : 4,
-                  CParameter.nbWorkers : 2}
+        options = {zstd.compressionLevel : 4,
+                  zstd.nbWorkers : 2}
 
         # compress()
         dat1 = compress(b, options=options)
@@ -579,7 +566,7 @@ class DecompressorTestCase(unittest.TestCase):
             ZstdDecompressor(options={2**31 : 100})
 
         with self.assertRaises(ZstdError):
-            ZstdDecompressor(options={DParameter.windowLogMax:100})
+            ZstdDecompressor(options={zstd.windowLogMax:100})
         with self.assertRaises(ZstdError):
             ZstdDecompressor(options={3333 : 100})
 
@@ -591,16 +578,16 @@ class DecompressorTestCase(unittest.TestCase):
         lzd.decompress(empty)
 
     def test_decompress_parameters(self):
-        d = {DParameter.windowLogMax : 15}
+        d = {zstd.windowLogMax : 15}
         ZstdDecompressor(options=d)
 
         # larger than signed int, ValueError
         d1 = d.copy()
-        d1[DParameter.windowLogMax] = 2**31
+        d1[zstd.windowLogMax] = 2**31
         self.assertRaises(ValueError, ZstdDecompressor, None, d1)
 
         # out of bounds error msg
-        options = {DParameter.windowLogMax:100}
+        options = {zstd.windowLogMax:100}
         with self.assertRaisesRegex(ZstdError,
                 (r'Error when setting zstd decompression parameter "windowLogMax", '
                  r'it should \d+ <= value <= \d+, provided value is 100\. '
@@ -609,7 +596,7 @@ class DecompressorTestCase(unittest.TestCase):
 
     def test_unknown_decompression_parameter(self):
         KEY = 100001234
-        options = {DParameter.windowLogMax: DParameter.windowLogMax.bounds()[1],
+        options = {zstd.windowLogMax: get_param_bounds(False, zstd.windowLogMax)[1],
                   KEY: 200000000}
         pattern = r'Zstd decompression parameter.*?"unknown parameter \(key %d\)"' \
                   % KEY
@@ -708,7 +695,7 @@ class DecompressorTestCase(unittest.TestCase):
 
         ZstdDecompressor()
         ZstdDecompressor(zd, {})
-        ZstdDecompressor(zstd_dict=zd, options={DParameter.windowLogMax:25})
+        ZstdDecompressor(zstd_dict=zd, options={zstd.windowLogMax:25})
 
     def test_decompressor_1(self):
         # empty
@@ -852,7 +839,7 @@ class DecompressorFlagsTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        options = {CParameter.checksumFlag:1}
+        options = {zstd.checksumFlag:1}
         c = ZstdCompressor(options)
 
         cls.DECOMPRESSED_42 = b'a'*42
@@ -1510,9 +1497,9 @@ class ZstdDictTestCase(unittest.TestCase):
             zd.as_undigested_dict = b'1234'
 
     def test_advanced_compression_parameters(self):
-        options = {CParameter.compressionLevel: 6,
-                  CParameter.windowLog: 20,
-                  CParameter.enableLongDistanceMatching: 1}
+        options = {zstd.compressionLevel: 6,
+                  zstd.windowLog: 20,
+                  zstd.enableLongDistanceMatching: 1}
 
         # automatically select
         dat = compress(SAMPLES[0], options=options, zstd_dict=TRAINED_DICT)
@@ -1543,14 +1530,14 @@ class FileTestCase(unittest.TestCase):
 
         with ZstdFile(io.BytesIO(), "w", level=12) as f:
             pass
-        with ZstdFile(io.BytesIO(), "w", options={CParameter.checksumFlag:1}) as f:
+        with ZstdFile(io.BytesIO(), "w", options={zstd.checksumFlag:1}) as f:
             pass
         with ZstdFile(io.BytesIO(), "w", options={}) as f:
             pass
         with ZstdFile(io.BytesIO(), "w", level=20, zstd_dict=TRAINED_DICT) as f:
             pass
 
-        with ZstdFile(io.BytesIO(), "r", options={DParameter.windowLogMax:25}) as f:
+        with ZstdFile(io.BytesIO(), "r", options={zstd.windowLogMax:25}) as f:
             pass
         with ZstdFile(io.BytesIO(), "r", options={}, zstd_dict=TRAINED_DICT) as f:
             pass
@@ -1636,11 +1623,6 @@ class FileTestCase(unittest.TestCase):
         with self.assertRaises(ValueError):
             ZstdFile(io.BytesIO(COMPRESSED_100_PLUS_32KB), "rw")
 
-        with self.assertRaisesRegex(TypeError, r"NOT be CParameter"):
-            ZstdFile(io.BytesIO(), 'rb', options={CParameter.compressionLevel:5})
-        with self.assertRaisesRegex(TypeError, r"NOT be DParameter"):
-            ZstdFile(io.BytesIO(), 'wb', options={DParameter.windowLogMax:21})
-
         with self.assertRaises(TypeError):
             ZstdFile(io.BytesIO(COMPRESSED_100_PLUS_32KB), "r", level=12)
 
@@ -1651,14 +1633,14 @@ class FileTestCase(unittest.TestCase):
         with self.assertRaises(ZstdError):
             ZstdFile(io.BytesIO(), "w", options={999:9999})
         with self.assertRaises(ZstdError):
-            ZstdFile(io.BytesIO(), "w", options={CParameter.windowLog:99})
+            ZstdFile(io.BytesIO(), "w", options={zstd.windowLog:99})
 
         with self.assertRaises(TypeError):
             ZstdFile(io.BytesIO(COMPRESSED_100_PLUS_32KB), "r", options=33)
 
         with self.assertRaises(ValueError):
             ZstdFile(io.BytesIO(COMPRESSED_100_PLUS_32KB),
-                             options={DParameter.windowLogMax:2**31})
+                             options={zstd.windowLogMax:2**31})
 
         with self.assertRaises(ZstdError):
             ZstdFile(io.BytesIO(COMPRESSED_100_PLUS_32KB),
@@ -1821,7 +1803,7 @@ class FileTestCase(unittest.TestCase):
             self.assertEqual(f.read(0), b"")
             self.assertEqual(f.read(), DECOMPRESSED_100_PLUS_32KB)
         with ZstdFile(io.BytesIO(COMPRESSED_100_PLUS_32KB),
-                              options={DParameter.windowLogMax:20}) as f:
+                              options={zstd.windowLogMax:20}) as f:
             self.assertEqual(f.read(0), b"")
 
         # empty file
@@ -2036,16 +2018,16 @@ class FileTestCase(unittest.TestCase):
             self.assertEqual(dst.getvalue(), expected)
 
         with io.BytesIO() as dst:
-            with ZstdFile(dst, "w", options={CParameter.checksumFlag:1}) as f:
+            with ZstdFile(dst, "w", options={zstd.checksumFlag:1}) as f:
                 f.write(raw_data)
 
-            comp = ZstdCompressor({CParameter.checksumFlag:1})
+            comp = ZstdCompressor({zstd.checksumFlag:1})
             expected = comp.compress(raw_data) + comp.flush()
             self.assertEqual(dst.getvalue(), expected)
 
         with io.BytesIO() as dst:
-            options = {CParameter.compressionLevel:-5,
-                      CParameter.checksumFlag:1}
+            options = {zstd.compressionLevel:-5,
+                      zstd.checksumFlag:1}
             with ZstdFile(dst, "w",
                           options=options) as f:
                 f.write(raw_data)
@@ -2504,11 +2486,11 @@ class OpenTestCase(unittest.TestCase):
         os.remove(TESTFN)
 
     def test_option(self):
-        options = {DParameter.windowLogMax:25}
+        options = {zstd.windowLogMax:25}
         with open(io.BytesIO(COMPRESSED_100_PLUS_32KB), "rb", options=options) as f:
             self.assertEqual(f.read(), DECOMPRESSED_100_PLUS_32KB)
 
-        options = {CParameter.compressionLevel:12}
+        options = {zstd.compressionLevel:12}
         with io.BytesIO() as bio:
             with open(bio, "wb", options=options) as f:
                 f.write(DECOMPRESSED_100_PLUS_32KB)

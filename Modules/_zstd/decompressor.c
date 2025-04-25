@@ -78,13 +78,6 @@ _PyZstd_set_d_parameters(ZstdDecompressor *self, PyObject *options)
 
     pos = 0;
     while (PyDict_Next(options, &pos, &key, &value)) {
-        /* Check key type */
-        if (Py_TYPE(key) == MS_MEMBER(CParameter_type)) {
-            PyErr_SetString(PyExc_TypeError,
-                            "Key of decompression options dict should "
-                            "NOT be CParameter.");
-            return -1;
-        }
 
         /* Both key & value should be 32-bit signed int */
         const int key_v = PyLong_AsInt(key);

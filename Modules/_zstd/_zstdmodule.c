@@ -406,20 +406,19 @@ success:
 
 
 /*[clinic input]
-_zstd._get_param_bounds
+_zstd.get_param_bounds
 
     is_compress: bool
         True for CParameter, False for DParameter.
     parameter: int
         The parameter to get bounds.
 
-Internal function, get CParameter/DParameter bounds.
+Get the bounds of a given parameter.
 [clinic start generated code]*/
 
 static PyObject *
-_zstd__get_param_bounds_impl(PyObject *module, int is_compress,
-                             int parameter)
-/*[clinic end generated code: output=b751dc710f89ef55 input=fb21ff96aff65df1]*/
+_zstd_get_param_bounds_impl(PyObject *module, int is_compress, int parameter)
+/*[clinic end generated code: output=af8b706bb1b2a9a8 input=f26aa76d199cb703]*/
 {
     ZSTD_bounds bound;
     if (is_compress) {
@@ -535,42 +534,6 @@ error:
     Py_CLEAR(ret);
 success:
     return ret;
-}
-
-/*[clinic input]
-_zstd._set_parameter_types
-
-    c_parameter_type: object(subclass_of='&PyType_Type')
-        CParameter IntEnum type object
-    d_parameter_type: object(subclass_of='&PyType_Type')
-        DParameter IntEnum type object
-
-Internal function, set CParameter/DParameter types for validity check.
-[clinic start generated code]*/
-
-static PyObject *
-_zstd__set_parameter_types_impl(PyObject *module, PyObject *c_parameter_type,
-                                PyObject *d_parameter_type)
-/*[clinic end generated code: output=a13d4890ccbd2873 input=3e7d0d37c3a1045a]*/
-{
-    STATE_FROM_MODULE(module);
-
-    if (!PyType_Check(c_parameter_type) || !PyType_Check(d_parameter_type)) {
-        PyErr_SetString(PyExc_ValueError,
-                        "The two arguments should be CParameter and "
-                        "DParameter types.");
-        return NULL;
-    }
-
-    Py_XDECREF(MS_MEMBER(CParameter_type));
-    Py_INCREF(c_parameter_type);
-    MS_MEMBER(CParameter_type) = (PyTypeObject*)c_parameter_type;
-
-    Py_XDECREF(MS_MEMBER(DParameter_type));
-    Py_INCREF(d_parameter_type);
-    MS_MEMBER(DParameter_type) = (PyTypeObject*)d_parameter_type;
-
-    Py_RETURN_NONE;
 }
 
 /*[clinic input]
@@ -757,10 +720,9 @@ success:
 static PyMethodDef _zstd_methods[] = {
     _ZSTD__TRAIN_DICT_METHODDEF
     _ZSTD__FINALIZE_DICT_METHODDEF
-    _ZSTD__GET_PARAM_BOUNDS_METHODDEF
+    _ZSTD_GET_PARAM_BOUNDS_METHODDEF
     _ZSTD_GET_FRAME_SIZE_METHODDEF
     _ZSTD__GET_FRAME_INFO_METHODDEF
-    _ZSTD__SET_PARAMETER_TYPES_METHODDEF
     _ZSTD_COMPRESS_METHODDEF
     _ZSTD_DECOMPRESS_METHODDEF
 
@@ -771,11 +733,17 @@ static PyMethodDef _zstd_methods[] = {
 /* --------------------
      Initialize code
    -------------------- */
-#define ADD_INT_PREFIX_MACRO(module, macro)                           \
-    do {                                                              \
-        if (PyModule_AddIntConstant(module, "_" #macro, macro) < 0) { \
-            return -1;                                                \
-        }                                                             \
+#define ADD_INT_PREFIX_MACRO(module, macro)                                \
+    do {                                                                   \
+        const char* name = #macro ;                                        \
+        size_t offset = 0;                                                 \
+        if ( !strncmp("ZSTD_c_", name, 7) ||                               \
+             !strncmp("ZSTD_d_", name, 7)) {                               \
+            offset = 7;                                                    \
+        }                                                                  \
+        if (PyModule_AddIntConstant(module, name + offset, macro) < 0) {   \
+            return -1;                                                     \
+        }                                                                  \
     } while(0)
 
 static int
@@ -881,7 +849,7 @@ add_vars_to_module(PyObject *module)
     obj = Py_BuildValue("II",
                         (uint32_t)ZSTD_CStreamInSize(),
                         (uint32_t)ZSTD_CStreamOutSize());
-    if (PyModule_AddObject(module, "_ZSTD_CStreamSizes", obj) < 0) {
+    if (PyModule_AddObject(module, "ZSTD_CStreamSizes", obj) < 0) {
         Py_XDECREF(obj);
         return -1;
     }
@@ -890,7 +858,7 @@ add_vars_to_module(PyObject *module)
     obj = Py_BuildValue("II",
                         (uint32_t)ZSTD_DStreamInSize(),
                         (uint32_t)ZSTD_DStreamOutSize());
-    if (PyModule_AddObject(module, "_ZSTD_DStreamSizes", obj) < 0) {
+    if (PyModule_AddObject(module, "ZSTD_DStreamSizes", obj) < 0) {
         Py_XDECREF(obj);
         return -1;
     }
@@ -979,9 +947,6 @@ static int _zstd_exec(PyObject *module) {
     ADD_STR_TO_STATE_MACRO(write);
     ADD_STR_TO_STATE_MACRO(flush);
 
-    MS_MEMBER(CParameter_type) = NULL;
-    MS_MEMBER(DParameter_type) = NULL;
-
     /* Add variables to module */
     if (add_vars_to_module(module) < 0) {
         return -1;
@@ -1067,8 +1032,6 @@ _zstd_traverse(PyObject *module, visitproc visit, void *arg)
 
     Py_VISIT(MS_MEMBER(ZstdError));
 
-    Py_VISIT(MS_MEMBER(CParameter_type));
-    Py_VISIT(MS_MEMBER(DParameter_type));
     return 0;
 }
 
@@ -1091,8 +1054,6 @@ _zstd_clear(PyObject *module)
 
     Py_CLEAR(MS_MEMBER(ZstdError));
 
-    Py_CLEAR(MS_MEMBER(CParameter_type));
-    Py_CLEAR(MS_MEMBER(DParameter_type));
     return 0;
 }
 

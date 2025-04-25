@@ -3,12 +3,12 @@ import io
 
 from os import PathLike
 
-from _zstd import ZstdCompressor, ZstdDecompressor, _ZSTD_DStreamSizes, ZstdError
+from _zstd import ZstdCompressor, ZstdDecompressor, ZSTD_DStreamSizes, ZstdError
 from compression._common import streams
 
 __all__ = ("ZstdFile", "open")
 
-_ZSTD_DStreamOutSize = _ZSTD_DStreamSizes[1]
+_ZSTD_DStreamOutSize = ZSTD_DStreamSizes[1]
 
 _MODE_CLOSED = 0
 _MODE_READ = 1

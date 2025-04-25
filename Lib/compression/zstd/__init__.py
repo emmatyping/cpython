@@ -7,9 +7,6 @@ Command line interface of this module: python -m pyzstd --help
 __all__ = (  # From this file
     "compressionLevel_values",
     "get_frame_info",
-    "CParameter",
-    "DParameter",
-    "Strategy",
     "finalize_dict",
     "train_dict",
     "zstd_support_multithread",
@@ -23,6 +20,7 @@ __all__ = (  # From this file
     "get_frame_size",
     "zstd_version",
     "zstd_version_info",
+    "get_param_bounds"
     # From zstd.zstdfile
     "open",
     "ZstdFile",
@@ -37,8 +35,6 @@ import _zstd
 from .zstdfile import ZstdFile, open
 
 
-_ZSTD_CStreamSizes = _zstd._ZSTD_CStreamSizes
-_ZSTD_DStreamSizes = _zstd._ZSTD_DStreamSizes
 _train_dict = _zstd._train_dict
 _finalize_dict = _zstd._finalize_dict
 
@@ -168,84 +164,4 @@ def finalize_dict(zstd_dict, samples, dict_size, level):
 
     return _zstd.ZstdDict(dict_content)
 
-class _UnsupportedCParameter:
-    def __set_name__(self, _, name):
-        self.name = name
-
-    def __get__(self, *_, **__):
-        msg = ("%s CParameter not available, zstd version is %s.") % (
-            self.name,
-            zstd_version,
-        )
-        raise NotImplementedError(msg)
-
-
-class CParameter(IntEnum):
-    """Compression parameters"""
-
-    compressionLevel = _zstd._ZSTD_c_compressionLevel
-    windowLog = _zstd._ZSTD_c_windowLog
-    hashLog = _zstd._ZSTD_c_hashLog
-    chainLog = _zstd._ZSTD_c_chainLog
-    searchLog = _zstd._ZSTD_c_searchLog
-    minMatch = _zstd._ZSTD_c_minMatch
-    targetLength = _zstd._ZSTD_c_targetLength
-    strategy = _zstd._ZSTD_c_strategy
-
-    targetCBlockSize = _UnsupportedCParameter()
-
-    enableLongDistanceMatching = _zstd._ZSTD_c_enableLongDistanceMatching
-    ldmHashLog = _zstd._ZSTD_c_ldmHashLog
-    ldmMinMatch = _zstd._ZSTD_c_ldmMinMatch
-    ldmBucketSizeLog = _zstd._ZSTD_c_ldmBucketSizeLog
-    ldmHashRateLog = _zstd._ZSTD_c_ldmHashRateLog
-
-    contentSizeFlag = _zstd._ZSTD_c_contentSizeFlag
-    checksumFlag = _zstd._ZSTD_c_checksumFlag
-    dictIDFlag = _zstd._ZSTD_c_dictIDFlag
-
-    nbWorkers = _zstd._ZSTD_c_nbWorkers
-    jobSize = _zstd._ZSTD_c_jobSize
-    overlapLog = _zstd._ZSTD_c_overlapLog
-
-    @lru_cache(maxsize=None)
-    def bounds(self):
-        """Return lower and upper bounds of a compression parameter, both inclusive."""
-        # 1 means compression parameter
-        return _zstd._get_param_bounds(1, self.value)
-
-
-class DParameter(IntEnum):
-    """Decompression parameters"""
-
-    windowLogMax = _zstd._ZSTD_d_windowLogMax
-
-    @lru_cache(maxsize=None)
-    def bounds(self):
-        """Return lower and upper bounds of a decompression parameter, both inclusive."""
-        # 0 means decompression parameter
-        return _zstd._get_param_bounds(0, self.value)
-
-
-class Strategy(IntEnum):
-    """Compression strategies, listed from fastest to strongest.
-
-    Note : new strategies _might_ be added in the future, only the order
-    (from fast to strong) is guaranteed.
-    """
-
-    fast = _zstd._ZSTD_fast
-    dfast = _zstd._ZSTD_dfast
-    greedy = _zstd._ZSTD_greedy
-    lazy = _zstd._ZSTD_lazy
-    lazy2 = _zstd._ZSTD_lazy2
-    btlazy2 = _zstd._ZSTD_btlazy2
-    btopt = _zstd._ZSTD_btopt
-    btultra = _zstd._ZSTD_btultra
-    btultra2 = _zstd._ZSTD_btultra2
-
-
-# Set CParameter/DParameter types for validity check
-_zstd._set_parameter_types(CParameter, DParameter)
-
-zstd_support_multithread = CParameter.nbWorkers.bounds() != (0, 0)
+zstd_support_multithread = get_param_bounds(True, nbWorkers) != (0, 0)

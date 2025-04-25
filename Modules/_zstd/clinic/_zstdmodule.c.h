@@ -145,26 +145,25 @@ exit:
     return return_value;
 }
 
-PyDoc_STRVAR(_zstd__get_param_bounds__doc__,
-"_get_param_bounds($module, /, is_compress, parameter)\n"
+PyDoc_STRVAR(_zstd_get_param_bounds__doc__,
+"get_param_bounds($module, /, is_compress, parameter)\n"
 "--\n"
 "\n"
-"Internal function, get CParameter/DParameter bounds.\n"
+"Get the bounds of a given parameter.\n"
 "\n"
 "  is_compress\n"
 "    True for CParameter, False for DParameter.\n"
 "  parameter\n"
 "    The parameter to get bounds.");
 
-#define _ZSTD__GET_PARAM_BOUNDS_METHODDEF    \
-    {"_get_param_bounds", _PyCFunction_CAST(_zstd__get_param_bounds), METH_FASTCALL|METH_KEYWORDS, _zstd__get_param_bounds__doc__},
+#define _ZSTD_GET_PARAM_BOUNDS_METHODDEF    \
+    {"get_param_bounds", _PyCFunction_CAST(_zstd_get_param_bounds), METH_FASTCALL|METH_KEYWORDS, _zstd_get_param_bounds__doc__},
 
 static PyObject *
-_zstd__get_param_bounds_impl(PyObject *module, int is_compress,
-                             int parameter);
+_zstd_get_param_bounds_impl(PyObject *module, int is_compress, int parameter);
 
 static PyObject *
-_zstd__get_param_bounds(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
+_zstd_get_param_bounds(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
 {
     PyObject *return_value = NULL;
     #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
@@ -188,7 +187,7 @@ _zstd__get_param_bounds(PyObject *module, PyObject *const *args, Py_ssize_t narg
     static const char * const _keywords[] = {"is_compress", "parameter", NULL};
     static _PyArg_Parser _parser = {
         .keywords = _keywords,
-        .fname = "_get_param_bounds",
+        .fname = "get_param_bounds",
         .kwtuple = KWTUPLE,
     };
     #undef KWTUPLE
@@ -209,7 +208,7 @@ _zstd__get_param_bounds(PyObject *module, PyObject *const *args, Py_ssize_t narg
     if (parameter == -1 && PyErr_Occurred()) {
         goto exit;
     }
-    return_value = _zstd__get_param_bounds_impl(module, is_compress, parameter);
+    return_value = _zstd_get_param_bounds_impl(module, is_compress, parameter);
 
 exit:
     return return_value;
@@ -347,78 +346,6 @@ exit:
        PyBuffer_Release(&frame_buffer);
     }
 
-    return return_value;
-}
-
-PyDoc_STRVAR(_zstd__set_parameter_types__doc__,
-"_set_parameter_types($module, /, c_parameter_type, d_parameter_type)\n"
-"--\n"
-"\n"
-"Internal function, set CParameter/DParameter types for validity check.\n"
-"\n"
-"  c_parameter_type\n"
-"    CParameter IntEnum type object\n"
-"  d_parameter_type\n"
-"    DParameter IntEnum type object");
-
-#define _ZSTD__SET_PARAMETER_TYPES_METHODDEF    \
-    {"_set_parameter_types", _PyCFunction_CAST(_zstd__set_parameter_types), METH_FASTCALL|METH_KEYWORDS, _zstd__set_parameter_types__doc__},
-
-static PyObject *
-_zstd__set_parameter_types_impl(PyObject *module, PyObject *c_parameter_type,
-                                PyObject *d_parameter_type);
-
-static PyObject *
-_zstd__set_parameter_types(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
-{
-    PyObject *return_value = NULL;
-    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
-
-    #define NUM_KEYWORDS 2
-    static struct {
-        PyGC_Head _this_is_not_used;
-        PyObject_VAR_HEAD
-        PyObject *ob_item[NUM_KEYWORDS];
-    } _kwtuple = {
-        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
-        .ob_item = { &_Py_ID(c_parameter_type), &_Py_ID(d_parameter_type), },
-    };
-    #undef NUM_KEYWORDS
-    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
-
-    #else  // !Py_BUILD_CORE
-    #  define KWTUPLE NULL
-    #endif  // !Py_BUILD_CORE
-
-    static const char * const _keywords[] = {"c_parameter_type", "d_parameter_type", NULL};
-    static _PyArg_Parser _parser = {
-        .keywords = _keywords,
-        .fname = "_set_parameter_types",
-        .kwtuple = KWTUPLE,
-    };
-    #undef KWTUPLE
-    PyObject *argsbuf[2];
-    PyObject *c_parameter_type;
-    PyObject *d_parameter_type;
-
-    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
-            /*minpos*/ 2, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
-    if (!args) {
-        goto exit;
-    }
-    if (!PyObject_TypeCheck(args[0], &PyType_Type)) {
-        _PyArg_BadArgument("_set_parameter_types", "argument 'c_parameter_type'", (&PyType_Type)->tp_name, args[0]);
-        goto exit;
-    }
-    c_parameter_type = args[0];
-    if (!PyObject_TypeCheck(args[1], &PyType_Type)) {
-        _PyArg_BadArgument("_set_parameter_types", "argument 'd_parameter_type'", (&PyType_Type)->tp_name, args[1]);
-        goto exit;
-    }
-    d_parameter_type = args[1];
-    return_value = _zstd__set_parameter_types_impl(module, c_parameter_type, d_parameter_type);
-
-exit:
     return return_value;
 }
 
@@ -610,4 +537,4 @@ exit:
 
     return return_value;
 }
-/*[clinic end generated code: output=af1508983250533c input=a9049054013a1b77]*/
+/*[clinic end generated code: output=7374524f65eeb53c input=a9049054013a1b77]*/

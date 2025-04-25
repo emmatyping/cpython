@@ -68,13 +68,6 @@ _PyZstd_set_c_parameters(ZstdCompressor *self, PyObject *level_or_options,
         Py_ssize_t pos = 0;
 
         while (PyDict_Next(level_or_options, &pos, &key, &value)) {
-            /* Check key type */
-            if (Py_TYPE(key) == MS_MEMBER(DParameter_type)) {
-                PyErr_SetString(PyExc_TypeError,
-                                "Key of compression option dict should "
-                                "NOT be DParameter.");
-                return -1;
-            }
 
             /* Both key & value should be 32-bit signed int */
             const int key_v = PyLong_AsInt(key);
