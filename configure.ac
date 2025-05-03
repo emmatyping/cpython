@@ -5421,8 +5421,7 @@ PKG_CHECK_MODULES([LIBZSTD], [libzstd], [have_libzstd=yes], [
     LIBS="$LIBS $LIBZSTD_LIBS"
     AC_CHECK_HEADERS([zstd.h zdict.h], [
       AC_CHECK_LIB([zstd], [ZDICT_finalizeDictionary], [
-        AC_RUN_IFELSE([AC_LANG_PROGRAM([
-          #include "zstd.h"
+        AC_RUN_IFELSE([AC_LANG_PROGRAM([@%:@include "zstd.h"
         ], [
           // if you update the minimum version, you should update the compile
           // check in Modules/_zstd/_zstdmodule.h

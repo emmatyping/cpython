@@ -22572,8 +22572,7 @@ See 'config.log' for more details" "$LINENO" 5; }
 else case e in #(
   e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-          #include "zstd.h"
+#include "zstd.h"
 
 int
 main (void)
@@ -22706,8 +22705,7 @@ See 'config.log' for more details" "$LINENO" 5; }
 else case e in #(
   e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-          #include "zstd.h"
+#include "zstd.h"
 
 int
 main (void)
