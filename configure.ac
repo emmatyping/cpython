@@ -5396,13 +5396,23 @@ AC_DEFUN([TEST_ZSTD_VERSION],[
   dnl This is checked when both a package is found and we do fallback searches
   dnl If you update the minimum version here, you should update the compile
   dnl check in Modules/_zstd/_zstdmodule.h
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([@%:@include "zstd.h"], [
-      #if ZSTD_VERSION_NUMBER < 10405
-          exit(1);
-      #endif
-    ])], [py__zstd_too_old=no], [py__zstd_too_old=yes])
-  dnl Important to record that we have libzstd
-  have_libzstd=yes
+  WITH_SAVE_ENV([
+    CFLAGS="$LIBZSTD_CFLAGS"
+    LIBS="$LIBZSTD_LIBS"
+    AC_RUN_IFELSE([AC_LANG_PROGRAM([@%:@include "zstd.h"], [
+        #if ZSTD_VERSION_NUMBER < 10405
+            exit(1);
+        #endif
+      ])], [
+        AC_MSG_RESULT([yes])
+        py__zstd_too_old=no
+      ], [
+        AC_MSG_RESULT([no])
+        py__zstd_too_old=yes
+      ])
+    dnl Important to record that we have libzstd
+    have_libzstd=yes
+  ])
 ])
 
 PKG_CHECK_MODULES([LIBZSTD], [libzstd], [TEST_ZSTD_VERSION()], [
