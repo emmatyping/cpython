@@ -249,8 +249,7 @@ _zstd_train_dict_impl(PyObject *module, PyBytesObject *samples_bytes,
     /* Check that the samples are valid and get their sizes */
     chunks_number = calculate_samples_stats(samples_bytes, samples_sizes,
                                             &chunk_sizes);
-    if (chunks_number < 0)
-    {
+    if (chunks_number < 0) {
         return NULL;
     }
 
@@ -331,8 +330,7 @@ _zstd_finalize_dict_impl(PyObject *module, PyBytesObject *custom_dict_bytes,
     /* Check that the samples are valid and get their sizes */
     chunks_number = calculate_samples_stats(samples_bytes, samples_sizes,
                                             &chunk_sizes);
-    if (chunks_number < 0)
-    {
+    if (chunks_number < 0) {
         return NULL;
     }
 
