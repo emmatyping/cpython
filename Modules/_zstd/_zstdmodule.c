@@ -183,7 +183,7 @@ calculate_samples_stats(PyBytesObject *samples_bytes, PyObject *samples_sizes,
     chunks_number = Py_SIZE(samples_sizes);
     if ((size_t) chunks_number > UINT32_MAX) {
         PyErr_Format(PyExc_ValueError,
-                        "The number of samples should be <= %u.", UINT32_MAX);
+                     "The number of samples should be <= %u.", UINT32_MAX);
         return -1;
     }
 
@@ -200,8 +200,8 @@ calculate_samples_stats(PyBytesObject *samples_bytes, PyObject *samples_sizes,
         (*chunk_sizes)[i] = PyLong_AsSize_t(size);
         if ((*chunk_sizes)[i] == (size_t)-1 && PyErr_Occurred()) {
             PyErr_Format(PyExc_ValueError,
-                            "Items in samples_sizes should be an int "
-                            "object, with a value between 0 and %u.", SIZE_MAX);
+                         "Items in samples_sizes should be an int "
+                         "object, with a value between 0 and %u.", SIZE_MAX);
             return -1;
         }
         sizes_sum += (*chunk_sizes)[i];
@@ -209,7 +209,8 @@ calculate_samples_stats(PyBytesObject *samples_bytes, PyObject *samples_sizes,
 
     if (sizes_sum != Py_SIZE(samples_bytes)) {
         PyErr_SetString(PyExc_ValueError,
-                        "The samples size tuple doesn't match the concatenation's size.");
+                        "The samples size tuple doesn't match "
+                        "the concatenation's size.");
         return -1;
     }
     return chunks_number;
