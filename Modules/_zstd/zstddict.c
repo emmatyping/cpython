@@ -18,7 +18,7 @@ class _zstd.ZstdDict "ZstdDict *" "&zstd_dict_type_spec"
 #include "zstddict.h"
 #include "clinic/zstddict.c.h"
 
-#include <zstd.h>                 // ZSTD_freeDDict(), ZSTD_getDictID_fromDict()
+#include <zstd.h>              // ZSTD_freeDDict(), ZSTD_getDictID_fromDict()
 
 #define ZstdDict_CAST(op) ((ZstdDict *)op)
 
@@ -72,13 +72,15 @@ _zstd_ZstdDict_new_impl(PyTypeObject *type, PyObject *dict_content,
        at least 8 bytes */
     if (Py_SIZE(self->dict_content) < 8) {
         PyErr_SetString(PyExc_ValueError,
-                        "Zstandard dictionary content should at least 8 bytes.");
+                        "Zstandard dictionary content should at least 8 "
+                        "bytes.");
         goto error;
     }
 
     /* Get dict_id, 0 means "raw content" dictionary. */
-    self->dict_id = ZSTD_getDictID_fromDict(PyBytes_AS_STRING(self->dict_content),
-                                            Py_SIZE(self->dict_content));
+    self->dict_id = ZSTD_getDictID_fromDict(
+                                PyBytes_AS_STRING(self->dict_content),
+                                Py_SIZE(self->dict_content));
 
     /* Check validity for ordinary dictionary */
     if (!is_raw && self->dict_id == 0) {
@@ -137,8 +139,10 @@ ZstdDict_str(PyObject *ob)
 }
 
 static PyMemberDef ZstdDict_members[] = {
-    {"dict_id", Py_T_UINT, offsetof(ZstdDict, dict_id), Py_READONLY, ZstdDict_dictid_doc},
-    {"dict_content", Py_T_OBJECT_EX, offsetof(ZstdDict, dict_content), Py_READONLY, ZstdDict_dictcontent_doc},
+    {"dict_id", Py_T_UINT, offsetof(ZstdDict, dict_id), Py_READONLY,
+     ZstdDict_dictid_doc},
+    {"dict_content", Py_T_OBJECT_EX, offsetof(ZstdDict, dict_content),
+     Py_READONLY, ZstdDict_dictcontent_doc},
     {NULL}
 };
 
@@ -149,7 +153,10 @@ _zstd.ZstdDict.as_digested_dict
 
 Load as a digested dictionary to compressor.
 
-Pass this attribute as zstd_dict argument: compress(dat, zstd_dict=zd.as_digested_dict)
+Pass this attribute as zstd_dict argument:
+
+compress(dat, zstd_dict=zd.as_digested_dict)
+
 1. Some advanced compression parameters of compressor may be overridden
    by parameters of digested dictionary.
 2. ZstdDict has a digested dictionaries cache for each compression level.
@@ -172,7 +179,10 @@ _zstd.ZstdDict.as_undigested_dict
 
 Load as an undigested dictionary to compressor.
 
-Pass this attribute as zstd_dict argument: compress(dat, zstd_dict=zd.as_undigested_dict)
+Pass this attribute as zstd_dict argument:
+
+compress(dat, zstd_dict=zd.as_undigested_dict)
+
 1. The advanced compression parameters of compressor will not be overridden.
 2. Loading an undigested dictionary is costly. If load an undigested dictionary
    multiple times, consider reusing a compressor object.
@@ -193,7 +203,10 @@ _zstd.ZstdDict.as_prefix
 
 Load as a prefix to compressor/decompressor.
 
-Pass this attribute as zstd_dict argument: compress(dat, zstd_dict=zd.as_prefix)
+Pass this attribute as zstd_dict argument:
+
+compress(dat, zstd_dict=zd.as_prefix)
+
 1. Prefix is compatible with long distance matching, while dictionary is not.
 2. It only works for the first frame, then the compressor/decompressor will
    return to no prefix state.
