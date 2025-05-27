@@ -1,5 +1,6 @@
 """Tool for generating Software Bill of Materials (SBOM) for Python's dependencies"""
 import os
+import random
 import re
 import hashlib
 import json
@@ -7,7 +8,9 @@ import glob
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import subprocess
 import sys
+import urllib.error
 import urllib.request
+import time
 import typing
 
 CPYTHON_ROOT_DIR = Path(__file__).parent.parent.parent
@@ -161,6 +164,23 @@ def get_externals() -> list[str]:
         get_externals_bat_path.read_text()
     )
     return externals
+
+
+def download_with_retries(download_location: str,
+                          max_retries: int = 7,
+                          base_delay: float = 2.25,
+                          max_jitter: float = 1.0) -> typing.Any:
+    """Download a file with exponential backoff retry."""
+    for attempt in range(max_retries):
+        try:
+            resp = urllib.request.urlopen(download_location)
+        except urllib.error.URLError as ex:
+            if attempt == max_retries:
+                msg = f"Download from {download_location} failed."
+                raise OSError(msg) from ex
+            time.sleep(base_delay**attempt + random.uniform(0, max_jitter))
+        else:
+            return resp
 
 
 def check_sbom_packages(sbom_data: dict[str, typing.Any]) -> None:
