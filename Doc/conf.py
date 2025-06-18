@@ -44,6 +44,7 @@ extensions = [
 _OPTIONAL_EXTENSIONS = (
     'notfound.extension',
     'sphinxext.opengraph',
+    'typeshed_types',
 )
 for optional_ext in _OPTIONAL_EXTENSIONS:
     try:
