@@ -180,8 +180,8 @@ _zstd_load_d_dict(ZstdDecompressor *self, PyObject *dict)
 
       Note, decompressing "an empty input" in any case will make it > 0.
 */
-static PyObject *
-decompress_lock_held(ZstdDecompressor *self, ZSTD_inBuffer *in,
+PyObject *
+_Py_zstd_decompress_lock_held(ZstdDecompressor *self, ZSTD_inBuffer *in,
                      Py_ssize_t max_length, bool multi_frame)
 {
     size_t zstd_ret;
@@ -284,8 +284,8 @@ decompressor_reset_session_lock_held(ZstdDecompressor *self)
     ZSTD_DCtx_reset(self->dctx, ZSTD_reset_session_only);
 }
 
-PyObject *
-_Py_zstd_stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
+static PyObject *
+stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
                                      Py_ssize_t max_length, bool multi_frame)
 {
     assert(PyMutex_IsLocked(&self->lock));
@@ -387,7 +387,7 @@ _Py_zstd_stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
     assert(in.pos == 0);
 
     /* Decompress */
-    ret = decompress_lock_held(self, &in, max_length, multi_frame);
+    ret = _Py_zstd_decompress_lock_held(self, &in, max_length, multi_frame);
     if (ret == NULL) {
         goto error;
     }
@@ -649,7 +649,7 @@ _zstd_ZstdDecompressor_decompress_impl(ZstdDecompressor *self,
     PyObject *ret;
     /* Thread-safe code */
     PyMutex_Lock(&self->lock);
-    ret = _Py_zstd_stream_decompress_lock_held(self, data, max_length, false);
+    ret = stream_decompress_lock_held(self, data, max_length, false);
     PyMutex_Unlock(&self->lock);
     return ret;
 }

@@ -587,6 +587,7 @@ _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *dict,
 /*[clinic end generated code: output=c8882d596aa4c342 input=8ffd0904f1ff7461]*/
 {
     PyObject *ret;
+    ZSTD_inBuffer in;
 
     _zstd_state* mod_state = get_zstd_state(module);
 
@@ -598,12 +599,14 @@ _zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *dict,
         return NULL;
     }
 
+    /* Prepare input data */
+    in.src = data->buf;
+    in.size = data->len;
+    in.pos = 0;
+
     ZstdDecompressor *decomp = ZstdDecompressor_CAST(decomp_obj);
-    /* Thread-safe code */
-    // TODO(emmatyping): Can we remove this lock somehow?
-    PyMutex_Lock(&decomp->lock);
-    ret = _Py_zstd_stream_decompress_lock_held(decomp, data, -1, true);
-    PyMutex_Unlock(&decomp->lock);
+
+    ret = _Py_zstd_decompress_lock_held(decomp, &in, -1, true);
     if (ret != NULL && !decomp->at_frame_edge) {
         PyErr_Format(mod_state->ZstdError,
                      "Compressed data ended before the end-of-stream marker");

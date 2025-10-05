@@ -83,8 +83,8 @@ typedef struct {
 #define ZstdDecompressor_CAST(op) ((ZstdDecompressor *)op)
 
 extern PyObject *
-_Py_zstd_stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
-                                     Py_ssize_t max_length, bool multi_frame);
+_Py_zstd_decompress_lock_held(ZstdDecompressor *self, ZSTD_inBuffer *in,
+                              Py_ssize_t max_length, bool multi_frame);
 
 extern ZstdDict *
 _Py_parse_zstd_dict(const _zstd_state *state,
