@@ -22,36 +22,6 @@ class _zstd.ZstdDecompressor "ZstdDecompressor *" "&zstd_decompressor_type_spec"
 #include <stddef.h>               // offsetof()
 #include <zstd.h>                 // ZSTD_*()
 
-typedef struct {
-    PyObject_HEAD
-
-    /* Decompression context */
-    ZSTD_DCtx *dctx;
-
-    /* ZstdDict object in use */
-    PyObject *dict;
-
-    /* Unconsumed input data */
-    char *input_buffer;
-    size_t input_buffer_size;
-    size_t in_begin, in_end;
-
-    /* Unused data */
-    PyObject *unused_data;
-
-    /* 0 if decompressor has (or may has) unconsumed input data, 0 or 1. */
-    bool needs_input;
-
-    /* For ZstdDecompressor, 0 or 1.
-       1 means the end of the first frame has been reached. */
-    bool eof;
-
-    /* Lock to protect the decompression context */
-    PyMutex lock;
-} ZstdDecompressor;
-
-#define ZstdDecompressor_CAST(op) ((ZstdDecompressor *)op)
-
 #include "clinic/decompressor.c.h"
 
 static inline ZSTD_DDict *
@@ -212,12 +182,18 @@ _zstd_load_d_dict(ZstdDecompressor *self, PyObject *dict)
 */
 static PyObject *
 decompress_lock_held(ZstdDecompressor *self, ZSTD_inBuffer *in,
-                     Py_ssize_t max_length)
+                     Py_ssize_t max_length, bool multi_frame)
 {
     size_t zstd_ret;
     ZSTD_outBuffer out;
     _BlocksOutputBuffer buffer = {.list = NULL};
     PyObject *ret;
+
+    if (multi_frame) {
+        if (self->at_frame_edge && in->pos == in->size) {
+            return Py_GetConstant(Py_CONSTANT_EMPTY_BYTES);
+        }
+    }
 
     /* Initialize the output buffer */
     if (_OutputBuffer_InitAndGrow(&buffer, &out, max_length) < 0) {
@@ -238,11 +214,21 @@ decompress_lock_held(ZstdDecompressor *self, ZSTD_inBuffer *in,
             goto error;
         }
 
-        /* Set .eof flag */
-        if (zstd_ret == 0) {
-            /* Stop when a frame is decompressed */
-            self->eof = 1;
-            break;
+        /* Set .eof/at_frame_edge flag */
+        if (multi_frame) {
+            self->at_frame_edge = (zstd_ret == 0) ? 1 : 0;
+
+            /* The second AFE check for setting .at_frame_edge flag */
+            if (self->at_frame_edge && in->pos == in->size) {
+                break;
+            }
+        }
+        else {
+            if (zstd_ret == 0) {
+                /* Stop when a frame is decompressed */
+                self->eof = 1;
+                break;
+            }
         }
 
         /* Need to check out before in. Maybe zstd's internal buffer still has
@@ -298,21 +284,23 @@ decompressor_reset_session_lock_held(ZstdDecompressor *self)
     ZSTD_DCtx_reset(self->dctx, ZSTD_reset_session_only);
 }
 
-static PyObject *
-stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
-                            Py_ssize_t max_length)
+PyObject *
+_Py_zstd_stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
+                                     Py_ssize_t max_length, bool multi_frame)
 {
     assert(PyMutex_IsLocked(&self->lock));
     ZSTD_inBuffer in;
     PyObject *ret = NULL;
     int use_input_buffer;
 
-    /* Check .eof flag */
-    if (self->eof) {
-        PyErr_SetString(PyExc_EOFError,
-                        "Already at the end of a Zstandard frame.");
-        assert(ret == NULL);
-        return NULL;
+    if (!multi_frame) {
+        /* Check .eof flag */
+        if (self->eof) {
+            PyErr_SetString(PyExc_EOFError,
+                            "Already at the end of a Zstandard frame.");
+            assert(ret == NULL);
+            return NULL;
+        }
     }
 
     /* Prepare input buffer w/wo unconsumed data */
@@ -399,18 +387,28 @@ stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
     assert(in.pos == 0);
 
     /* Decompress */
-    ret = decompress_lock_held(self, &in, max_length);
+    ret = decompress_lock_held(self, &in, max_length, multi_frame);
     if (ret == NULL) {
         goto error;
     }
 
     /* Unconsumed input data */
     if (in.pos == in.size) {
-        if (Py_SIZE(ret) == max_length || self->eof) {
-            self->needs_input = 0;
+        if (multi_frame) {
+            if (Py_SIZE(ret) == max_length && !self->at_frame_edge) {
+                self->needs_input = 0;
+            }
+            else {
+                self->needs_input = 1;
+            }
         }
         else {
-            self->needs_input = 1;
+            if (Py_SIZE(ret) == max_length || self->eof) {
+            self->needs_input = 0;
+            }
+            else {
+                self->needs_input = 1;
+            }
         }
 
         if (use_input_buffer) {
@@ -423,6 +421,10 @@ stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
         size_t data_size = in.size - in.pos;
 
         self->needs_input = 0;
+
+        if (multi_frame) {
+            self->at_frame_edge = 0;
+        }
 
         if (!use_input_buffer) {
             /* Discard buffer if it's too small
@@ -647,7 +649,7 @@ _zstd_ZstdDecompressor_decompress_impl(ZstdDecompressor *self,
     PyObject *ret;
     /* Thread-safe code */
     PyMutex_Lock(&self->lock);
-    ret = stream_decompress_lock_held(self, data, max_length);
+    ret = _Py_zstd_stream_decompress_lock_held(self, data, max_length, false);
     PyMutex_Unlock(&self->lock);
     return ret;
 }

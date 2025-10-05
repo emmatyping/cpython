@@ -426,4 +426,98 @@ _zstd_set_parameter_types(PyObject *module, PyObject *const *args, Py_ssize_t na
 exit:
     return return_value;
 }
-/*[clinic end generated code: output=437b084f149e68e5 input=a9049054013a1b77]*/
+
+PyDoc_STRVAR(_zstd_decompress__doc__,
+"decompress($module, /, data, zstd_dict=None, options=None)\n"
+"--\n"
+"\n"
+"Decompress one or more frames of Zstandard compressed *data*.\n"
+"\n"
+"  data\n"
+"    The data to decompress\n"
+"  zstd_dict\n"
+"    A ZstdDict object, a pre-trained Zstandard dictionary.\n"
+"  options\n"
+"    A dict object that contains advanced decompression parameters.\n"
+"\n"
+"*zstd_dict* is a ZstdDict object, a pre-trained Zstandard dictionary. See\n"
+"the function train_dict for how to train a ZstdDict on sample data.\n"
+"*options* is a dict object that contains advanced compression\n"
+"parameters. See DecompressionParameter for more on options.\n"
+"\n"
+"For incremental decompression, use a ZstdDecompressor instead.");
+
+#define _ZSTD_DECOMPRESS_METHODDEF    \
+    {"decompress", _PyCFunction_CAST(_zstd_decompress), METH_FASTCALL|METH_KEYWORDS, _zstd_decompress__doc__},
+
+static PyObject *
+_zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *dict,
+                      PyObject *options);
+
+static PyObject *
+_zstd_decompress(PyObject *module, PyObject *const *args, Py_ssize_t nargs, PyObject *kwnames)
+{
+    PyObject *return_value = NULL;
+    #if defined(Py_BUILD_CORE) && !defined(Py_BUILD_CORE_MODULE)
+
+    #define NUM_KEYWORDS 3
+    static struct {
+        PyGC_Head _this_is_not_used;
+        PyObject_VAR_HEAD
+        Py_hash_t ob_hash;
+        PyObject *ob_item[NUM_KEYWORDS];
+    } _kwtuple = {
+        .ob_base = PyVarObject_HEAD_INIT(&PyTuple_Type, NUM_KEYWORDS)
+        .ob_hash = -1,
+        .ob_item = { &_Py_ID(data), &_Py_ID(zstd_dict), &_Py_ID(options), },
+    };
+    #undef NUM_KEYWORDS
+    #define KWTUPLE (&_kwtuple.ob_base.ob_base)
+
+    #else  // !Py_BUILD_CORE
+    #  define KWTUPLE NULL
+    #endif  // !Py_BUILD_CORE
+
+    static const char * const _keywords[] = {"data", "zstd_dict", "options", NULL};
+    static _PyArg_Parser _parser = {
+        .keywords = _keywords,
+        .fname = "decompress",
+        .kwtuple = KWTUPLE,
+    };
+    #undef KWTUPLE
+    PyObject *argsbuf[3];
+    Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 1;
+    Py_buffer data = {NULL, NULL};
+    PyObject *dict = Py_None;
+    PyObject *options = Py_None;
+
+    args = _PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+            /*minpos*/ 1, /*maxpos*/ 3, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
+    if (!args) {
+        goto exit;
+    }
+    if (PyObject_GetBuffer(args[0], &data, PyBUF_SIMPLE) != 0) {
+        goto exit;
+    }
+    if (!noptargs) {
+        goto skip_optional_pos;
+    }
+    if (args[1]) {
+        dict = args[1];
+        if (!--noptargs) {
+            goto skip_optional_pos;
+        }
+    }
+    options = args[2];
+skip_optional_pos:
+    return_value = _zstd_decompress_impl(module, &data, dict, options);
+
+exit:
+    /* Cleanup for data */
+    if (data.obj) {
+       PyBuffer_Release(&data);
+    }
+
+    return return_value;
+}
+/*[clinic end generated code: output=b60e1f4ad1e6d4a2 input=a9049054013a1b77]*/

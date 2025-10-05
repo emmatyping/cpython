@@ -5,6 +5,9 @@
 #ifndef ZSTD_MODULE_H
 #define ZSTD_MODULE_H
 
+
+#include <stdbool.h>              // bool
+
 #include "zstddict.h"
 
 /* Type specs */
@@ -45,6 +48,43 @@ typedef enum {
     DICT_TYPE_UNDIGESTED = 1,
     DICT_TYPE_PREFIX = 2
 } dictionary_type;
+
+typedef struct {
+    PyObject_HEAD
+
+    /* Decompression context */
+    ZSTD_DCtx *dctx;
+
+    /* ZstdDict object in use */
+    PyObject *dict;
+
+    /* Unconsumed input data */
+    char *input_buffer;
+    size_t input_buffer_size;
+    size_t in_begin, in_end;
+
+    /* Unused data */
+    PyObject *unused_data;
+
+    /* 0 if decompressor has (or may has) unconsumed input data, 0 or 1. */
+    bool needs_input;
+
+    /* For ZstdDecompressor, 0 or 1.
+       1 means the end of the first frame has been reached. */
+    bool eof;
+
+    /* Are we at the edge of a frame when decompressing multiple frames? */
+    bool at_frame_edge;
+
+    /* Lock to protect the decompression context */
+    PyMutex lock;
+} ZstdDecompressor;
+
+#define ZstdDecompressor_CAST(op) ((ZstdDecompressor *)op)
+
+extern PyObject *
+_Py_zstd_stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
+                                     Py_ssize_t max_length, bool multi_frame);
 
 extern ZstdDict *
 _Py_parse_zstd_dict(const _zstd_state *state,

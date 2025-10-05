@@ -561,6 +561,60 @@ _zstd_set_parameter_types_impl(PyObject *module, PyObject *c_parameter_type,
     Py_RETURN_NONE;
 }
 
+/*[clinic input]
+_zstd.decompress
+
+    data: Py_buffer
+        The data to decompress
+    zstd_dict as dict: object = None
+        A ZstdDict object, a pre-trained Zstandard dictionary.
+    options: object = None
+        A dict object that contains advanced decompression parameters.
+
+Decompress one or more frames of Zstandard compressed *data*.
+
+*zstd_dict* is a ZstdDict object, a pre-trained Zstandard dictionary. See
+the function train_dict for how to train a ZstdDict on sample data.
+*options* is a dict object that contains advanced compression
+parameters. See DecompressionParameter for more on options.
+
+For incremental decompression, use a ZstdDecompressor instead.
+[clinic start generated code]*/
+
+static PyObject *
+_zstd_decompress_impl(PyObject *module, Py_buffer *data, PyObject *dict,
+                      PyObject *options)
+/*[clinic end generated code: output=c8882d596aa4c342 input=8ffd0904f1ff7461]*/
+{
+    PyObject *ret;
+
+    _zstd_state* mod_state = get_zstd_state(module);
+
+    PyObject *args[2] = {dict, options};
+    PyObject *decomp_obj = PyObject_Vectorcall(
+        (PyObject *) mod_state->ZstdDecompressor_type,
+        args, 2, NULL);
+    if (decomp_obj == NULL) {
+        return NULL;
+    }
+
+    ZstdDecompressor *decomp = ZstdDecompressor_CAST(decomp_obj);
+    /* Thread-safe code */
+    // TODO(emmatyping): Can we remove this lock somehow?
+    PyMutex_Lock(&decomp->lock);
+    ret = _Py_zstd_stream_decompress_lock_held(decomp, data, -1, true);
+    PyMutex_Unlock(&decomp->lock);
+    if (ret != NULL && !decomp->at_frame_edge) {
+        PyErr_Format(mod_state->ZstdError,
+                     "Compressed data ended before the end-of-stream marker");
+        Py_DECREF(decomp);
+        return NULL;
+    }
+    // Free decompressor
+    Py_XDECREF(decomp);
+    return ret;
+}
+
 static PyMethodDef _zstd_methods[] = {
     _ZSTD_TRAIN_DICT_METHODDEF
     _ZSTD_FINALIZE_DICT_METHODDEF
@@ -568,6 +622,7 @@ static PyMethodDef _zstd_methods[] = {
     _ZSTD_GET_FRAME_SIZE_METHODDEF
     _ZSTD_GET_FRAME_INFO_METHODDEF
     _ZSTD_SET_PARAMETER_TYPES_METHODDEF
+    _ZSTD_DECOMPRESS_METHODDEF
     {NULL, NULL}
 };
 

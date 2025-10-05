@@ -5,7 +5,6 @@ __all__ = (
     'COMPRESSION_LEVEL_DEFAULT',
     'compress',
     'CompressionParameter',
-    'decompress',
     'DecompressionParameter',
     'finalize_dict',
     'get_frame_info',
@@ -17,6 +16,7 @@ __all__ = (
     'ZstdFile',
 
     # _zstd
+    'decompress',
     'get_frame_size',
     'zstd_version',
     'zstd_version_info',
@@ -29,7 +29,7 @@ __all__ = (
 import _zstd
 import enum
 from _zstd import (ZstdCompressor, ZstdDecompressor, ZstdDict, ZstdError,
-                   get_frame_size, zstd_version)
+                   decompress, get_frame_size, zstd_version)
 from compression.zstd._zstdfile import ZstdFile, open, _nbytes
 
 # zstd_version_number is (MAJOR * 100 * 100 + MINOR * 100 + RELEASE)
@@ -149,7 +149,7 @@ def compress(data, level=None, options=None, zstd_dict=None):
     return comp.compress(data, mode=ZstdCompressor.FLUSH_FRAME)
 
 
-def decompress(data, zstd_dict=None, options=None):
+def decompress_old(data, zstd_dict=None, options=None):
     """Decompress one or more frames of Zstandard compressed *data*.
 
     *zstd_dict* is a ZstdDict object, a pre-trained Zstandard dictionary. See
