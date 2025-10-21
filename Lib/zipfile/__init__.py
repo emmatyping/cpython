@@ -14,6 +14,8 @@ import sys
 import threading
 import time
 
+from compression._common import _streams
+
 try:
     import zlib # We may need its compression method
     crc32 = zlib.crc32
@@ -880,6 +882,225 @@ def _get_decompressor(compress_type):
         else:
             raise NotImplementedError("compression type %d" % (compress_type,))
 
+# Value 0 no longer used
+_MODE_READ     = 1
+# Value 2 no longer used
+_MODE_WRITE    = 3
+
+class _DeflateFile(_streams.BaseStream):
+
+    """A file object providing transparent Deflate (de)compression.
+
+    A _DeflateFile can act as a wrapper for an existing file object, or
+    refer directly to a named file on disk.
+
+    Note that _DeflateFile provides a *binary* file interface - data read
+    is returned as bytes, and data to be written must be given as bytes.
+    """
+
+    def __init__(self, filename=None, mode="r", *,
+                 level=zlib.Z_DEFAULT_COMPRESSION, method=zlib.DEFLATED,
+                 wbits=zlib.MAX_WBITS, memLevel=zlib.DEF_MEM_LEVEL,
+                 strategy=zlib.Z_DEFAULT_STRATEGY, zdict=None):
+        """Open an Deflate-compressed file in binary mode.
+
+        TODO(emmatyping): docstring
+        """
+        self._fp = None
+        self._closefp = False
+        self._mode = None
+
+        if mode in ("r", "rb"):
+            mode_code = _MODE_READ
+        elif mode in ("w", "wb", "a", "ab", "x", "xb"):
+            mode_code = _MODE_WRITE
+            self._compressor = zlib.compressobj(level, method, wbits, memLevel,
+                                                strategy, zdict)
+            self._pos = 0
+        else:
+            raise ValueError("Invalid mode: {!r}".format(mode))
+
+        if isinstance(filename, (str, bytes, os.PathLike)):
+            if "b" not in mode:
+                mode += "b"
+            self._fp = io.open(filename, mode)
+            self._closefp = True
+            self._mode = mode_code
+        elif hasattr(filename, "read") or hasattr(filename, "write"):
+            self._fp = filename
+            self._mode = mode_code
+        else:
+            raise TypeError("filename must be a str, bytes, file or PathLike object")
+
+        if self._mode == _MODE_READ:
+            raw = _streams.DecompressReader(self._fp, zlib.decompressobj,
+                trailing_error=zlib.error, wbits=wbits, zdict=zdict)
+            self._buffer = io.BufferedReader(raw)
+
+    def close(self):
+        """Flush and close the file.
+
+        May be called more than once without error. Once the file is
+        closed, any other operation on it will raise a ValueError.
+        """
+        if self.closed:
+            return
+        try:
+            if self._mode == _MODE_READ:
+                self._buffer.close()
+                self._buffer = None
+            elif self._mode == _MODE_WRITE:
+                self._fp.write(self._compressor.flush())
+                self._compressor = None
+        finally:
+            try:
+                if self._closefp:
+                    self._fp.close()
+            finally:
+                self._fp = None
+                self._closefp = False
+
+    @property
+    def closed(self):
+        """True if this file is closed."""
+        return self._fp is None
+
+    @property
+    def name(self):
+        self._check_not_closed()
+        return self._fp.name
+
+    @property
+    def mode(self):
+        return 'wb' if self._mode == _MODE_WRITE else 'rb'
+
+    def fileno(self):
+        """Return the file descriptor for the underlying file."""
+        self._check_not_closed()
+        return self._fp.fileno()
+
+    def seekable(self):
+        """Return whether the file supports seeking."""
+        return self.readable() and self._buffer.seekable()
+
+    def readable(self):
+        """Return whether the file was opened for reading."""
+        self._check_not_closed()
+        return self._mode == _MODE_READ
+
+    def writable(self):
+        """Return whether the file was opened for writing."""
+        self._check_not_closed()
+        return self._mode == _MODE_WRITE
+
+    def peek(self, size=-1):
+        """Return buffered data without advancing the file position.
+
+        Always returns at least one byte of data, unless at EOF.
+        The exact number of bytes returned is unspecified.
+        """
+        self._check_can_read()
+        # Relies on the undocumented fact that BufferedReader.peek() always
+        # returns at least one byte (except at EOF)
+        return self._buffer.peek(size)
+
+    def read(self, size=-1):
+        """Read up to size uncompressed bytes from the file.
+
+        If size is negative or omitted, read until EOF is reached.
+        Returns b"" if the file is already at EOF.
+        """
+        self._check_can_read()
+        return self._buffer.read(size)
+
+    def read1(self, size=-1):
+        """Read up to size uncompressed bytes, while trying to avoid
+        making multiple reads from the underlying stream. Reads up to a
+        buffer's worth of data if size is negative.
+
+        Returns b"" if the file is at EOF.
+        """
+        self._check_can_read()
+        if size < 0:
+            size = io.DEFAULT_BUFFER_SIZE
+        return self._buffer.read1(size)
+
+    def readline(self, size=-1):
+        """Read a line of uncompressed bytes from the file.
+
+        The terminating newline (if present) is retained. If size is
+        non-negative, no more than size bytes will be read (in which
+        case the line may be incomplete). Returns b'' if already at EOF.
+        """
+        self._check_can_read()
+        return self._buffer.readline(size)
+
+    def write(self, data):
+        """Write a bytes object to the file.
+
+        Returns the number of uncompressed bytes written, which is
+        always the length of data in bytes. Note that due to buffering,
+        the file on disk may not reflect the data written until close()
+        is called.
+        """
+        self._check_can_write()
+        if isinstance(data, (bytes, bytearray)):
+            length = len(data)
+        else:
+            # accept any data that supports the buffer protocol
+            data = memoryview(data)
+            length = data.nbytes
+
+        compressed = self._compressor.compress(data)
+        self._fp.write(compressed)
+        self._pos += length
+        return length
+
+    def seek(self, offset, whence=io.SEEK_SET):
+        """Change the file position.
+
+        The new position is specified by offset, relative to the
+        position indicated by whence. Possible values for whence are:
+
+            0: start of stream (default): offset must not be negative
+            1: current stream position
+            2: end of stream; offset must not be positive
+
+        Returns the new file position.
+
+        Note that seeking is emulated, so depending on the parameters,
+        this operation may be extremely slow.
+        """
+        self._check_can_seek()
+        return self._buffer.seek(offset, whence)
+
+    def tell(self):
+        """Return the current file position."""
+        self._check_not_closed()
+        if self._mode == _MODE_READ:
+            return self._buffer.tell()
+        return self._pos
+
+_COMPRESSORS = {
+    ...
+}
+
+_DECOMPRESSORS = {
+    ZIP_STORED: None
+}
+
+if bz2 is not None:
+    _DECOMPRESSORS[ZIP_BZIP2] = bz2.BZ2File
+if lzma is not None:
+    # TODO(emmatyping): partial arguments to handle filters
+    _DECOMPRESSORS[ZIP_LZMA] = lzma.LZMAFile
+if zlib is not None:
+    _DECOMPRESSORS[ZIP_DEFLATED] = _DeflateFile
+if zstd is not None:
+    _DECOMPRESSORS[ZIP_ZSTANDARD] = zstd.ZstdFile
+
+def make_decompressor(fileobj, zinfo):
+    return _DECOMPRESSORS.get(zinfo.compress_type, None)(fileobj)
 
 class _SharedFile:
     def __init__(self, file, pos, close, lock, writing):
@@ -958,9 +1179,14 @@ class ZipExtFile(io.BufferedIOBase):
     # Chunk size to read during seek
     MAX_SEEK_READ = 1 << 24
 
-    def __init__(self, fileobj, mode, zipinfo, pwd=None,
-                 close_fileobj=False):
-        self._fileobj = fileobj
+    def __init__(self, fileobj, mode, zipinfo, pos, closer, lock, writing,
+                 pwd=None, close_fileobj=False):
+        self._fileobj = _SharedFile(fileobj, pos, closer, lock, writing)
+        decompressor = make_decompressor(fileobj, zipinfo)
+        if decompressor is not None:
+            self.decompresser_stream = decompressor
+        else:
+            self.decompresser_stream = self._fileobj
         self._pwd = pwd
         self._close_fileobj = close_fileobj
 
@@ -1727,8 +1953,6 @@ class ZipFile:
 
         # Open for reading:
         self._fileRefCnt += 1
-        zef_file = _SharedFile(self.fp, zinfo.header_offset,
-                               self._fpclose, self._lock, lambda: self._writing)
         try:
             # Skip the file header:
             fheader = zef_file.read(sizeFileHeader)
