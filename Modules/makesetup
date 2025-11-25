@@ -83,6 +83,8 @@ case $makepre in
 '')	makepre=Makefile.pre;;
 esac
 
+UNAME_SYSTEM=`uname -s 2>/dev/null || echo unknown`
+
 # Newline for sed i and a commands
 NL='\
 '
@@ -144,6 +146,8 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 		srcs=
 		cpps=
 		libs=
+		rust=
+		manifest=
 		mods=
 		mods_upper=
 		skip=
@@ -176,6 +180,8 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 			*.c++)		srcs="$srcs $arg";;
 			*.cxx)		srcs="$srcs $arg";;
 			*.cpp)		srcs="$srcs $arg";;
+			*.rs)       srcs="$srcs $arg"; rust="true";;
+			*.toml)     manifest="$arg";;
 			\$\(*_CFLAGS\))		cpps="$cpps $arg";;
 			\$\(*_INCLUDES\))	cpps="$cpps $arg";;
 			\$\(*_LIBS\))		libs="$libs $arg";;
@@ -226,44 +232,75 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 		yes)	continue;;
 		esac
 		objs=''
-		for src in $srcs
-		do
-			case $src in
-			*.c)   obj=`basename $src .c`.o; cc='$(CC)';;
-			*.cc)  obj=`basename $src .cc`.o; cc='$(CXX)';;
-			*.c++) obj=`basename $src .c++`.o; cc='$(CXX)';;
-			*.C)   obj=`basename $src .C`.o; cc='$(CXX)';;
-			*.cxx) obj=`basename $src .cxx`.o; cc='$(CXX)';;
-			*.cpp) obj=`basename $src .cpp`.o; cc='$(CXX)';;
-			*.m)   obj=`basename $src .m`.o; cc='$(CC)';; # Obj-C
-			*)     continue;;
-			esac
-			case $src in
-			*/*) obj="$srcdir/`dirname $src`/$obj";;
-			*)   obj="$srcdir/$obj";;
-			esac
-			objs="$objs $obj"
-			case $src in
-			glmodule.c) ;;
-			/*) ;;
-			\$*) ;;
-			*) src='$(srcdir)/'"$srcdir/$src";;
-			esac
-			# custom flags first, PY_STDMODULE_CFLAGS may contain -I with system libmpdec
-			case $doconfig in
-			no)
-				cc="$cc $cpps \$(PY_STDMODULE_CFLAGS) \$(CCSHARED)"
-				rule="$obj: $src \$(MODULE_${mods_upper}_DEPS) \$(MODULE_DEPS_SHARED) \$(PYTHON_HEADERS)"
-				rule="$rule; $cc -c $src -o $obj"
-				;;
-			*)
-				cc="$cc $cpps \$(PY_BUILTIN_MODULE_CFLAGS)"
-				rule="$obj: $src \$(MODULE_${mods_upper}_DEPS) \$(MODULE_DEPS_STATIC) \$(PYTHON_HEADERS)"
-				rule="$rule; $cc -c $src -o $obj"
-				;;
-			esac
+		custom_ldflags=''
+		if test "x$rust" = "x"; then
+			for src in $srcs
+			do
+				case $src in
+				*.c)   obj=`basename $src .c`.o; cc='$(CC)';;
+				*.cc)  obj=`basename $src .cc`.o; cc='$(CXX)';;
+				*.c++) obj=`basename $src .c++`.o; cc='$(CXX)';;
+				*.C)   obj=`basename $src .C`.o; cc='$(CXX)';;
+				*.cxx) obj=`basename $src .cxx`.o; cc='$(CXX)';;
+				*.cpp) obj=`basename $src .cpp`.o; cc='$(CXX)';;
+				*.m)   obj=`basename $src .m`.o; cc='$(CC)';; # Obj-C
+				*)     continue;;
+				esac
+				case $src in
+				*/*) obj="$srcdir/`dirname $src`/$obj";;
+				*)   obj="$srcdir/$obj";;
+				esac
+				objs="$objs $obj"
+				case $src in
+				glmodule.c) ;;
+				/*) ;;
+				\$*) ;;
+				*) src='$(srcdir)/'"$srcdir/$src";;
+				esac
+				# custom flags first, PY_STDMODULE_CFLAGS may contain -I with system libmpdec
+				case $doconfig in
+				no)
+					cc="$cc $cpps \$(PY_STDMODULE_CFLAGS) \$(CCSHARED)"
+					rule="$obj: $src \$(MODULE_${mods_upper}_DEPS) \$(MODULE_DEPS_SHARED) \$(PYTHON_HEADERS)"
+					rule="$rule; $cc -c $src -o $obj"
+					;;
+				*)
+					cc="$cc $cpps \$(PY_BUILTIN_MODULE_CFLAGS)"
+					rule="$obj: $src \$(MODULE_${mods_upper}_DEPS) \$(MODULE_DEPS_STATIC) \$(PYTHON_HEADERS)"
+					rule="$rule; $cc -c $src -o $obj"
+					;;
+				esac
+				echo "$rule" >>$rulesf
+			done
+		else
+			prefixed_srcs=
+			for src in $srcs
+			do
+				prefixed_srcs="$prefixed_srcs $srcdir/$src"
+			done
+			objs=
+			# there's actually only one obj, so just set it to the lib
+			for lib in $libs
+			do
+				objs="target/\$(CARGO_TARGET_DIR)/$lib"
+			done
+			libs=
+			# depends on the headers through cpython-sys
+			rule="$objs: cpython-sys \$(srcdir)/Cargo.toml \$(srcdir)/Cargo.lock \$(srcdir)/$srcdir/$manifest $prefixed_srcs \$(PYTHON_HEADERS)"
+			rule="$rule; CARGO_TARGET_DIR=\$(abs_builddir)/target PYTHON_BUILD_DIR=\$(abs_builddir) \$(CARGO_HOME)/bin/cargo build --lib --locked --package ${mods} --profile \$(CARGO_PROFILE) \$(if \$(CARGO_TARGET),--target=\$(CARGO_TARGET)) --manifest-path \$(srcdir)/Cargo.toml"
 			echo "$rule" >>$rulesf
-		done
+			for mod in $mods
+			do
+				case $UNAME_SYSTEM in
+				Darwin*)
+					custom_ldflags="$custom_ldflags -Wl,-u,_PyInit_$mod"
+					;;
+				*)
+					custom_ldflags="$custom_ldflags -Wl,--defsym=PyInit_$mod=PyInit_$mod"
+					;;
+				esac
+			done
+		fi
 		case $doconfig in
 		yes)	OBJS="$OBJS $objs";;
 		esac
@@ -277,7 +314,7 @@ sed -e 's/[ 	]*#.*//' -e '/^[ 	]*$/d' |
 				;;
 			esac
 			rule="$file: $objs \$(MODULE_${mods_upper}_LDEPS)"
-			rule="$rule; \$(BLDSHARED) $objs $libs \$(LIBPYTHON) -o $file"
+			rule="$rule; \$(BLDSHARED) $custom_ldflags $objs $libs \$(LIBPYTHON) -o $file"
 			echo "$rule" >>$rulesf
 		done
 	done
