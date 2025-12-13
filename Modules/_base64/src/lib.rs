@@ -250,3 +250,61 @@ pub static _BASE64_MODULE: ModuleDef = {
 pub extern "C" fn PyInit__base64() -> *mut PyObject {
     _BASE64_MODULE.init_multi_phase()
 }
+
+use cpython_sys::*;
+use core::ffi::CStr;
+//use core::ffi::c_void;
+
+pub const Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED: *mut core::ffi::c_void = 0 as *mut core::ffi::c_void;
+
+pub enum PyModuleDefSlot {
+    Name(&'static CStr),
+    Doc(&'static CStr),
+    MultipleInterpreters(*mut c_void),
+    GIL(*mut c_void),
+    StateSize(usize),
+}
+
+pub struct PyModuleDefSlots<const N: usize>([PyModuleDef_Slot; N]);
+
+impl<const N: usize> From<PyModuleDefSlots<N>> for [PyModuleDef_Slot; N] {
+    fn from(value: PyModuleDefSlots<N>) -> Self {
+        todo!()
+    }
+}
+
+impl<const N: usize> From<[PyModuleDefSlot; N]> for PyModuleDefSlots<N> {
+    fn from(value: [PyModuleDefSlot; N]) -> Self {
+        
+    }
+}
+
+pub struct PyModule<const N: usize>(UnsafeCell<[PyModuleDef_Slot; N]>);
+
+
+impl<const N: usize> PyModule<N> {
+    pub const fn new(slots: [PyModuleDefSlot; N]) -> Self {
+        Self {
+            0: UnsafeCell::new(slots.into())
+        }
+    }
+
+    pub fn as_mut_ptr(&'static self) -> *mut PyModuleDef_Slot {
+        self.0.get() as *mut _
+    }
+}
+
+unsafe impl<const N: usize> Sync for PyModule<N> {}
+
+static MODULE: PyModule<5> = PyModule::new([
+    PyModuleDefSlot::Name(c"mymodule"),
+    PyModuleDefSlot::Doc(c"An example module for a proof of concept"),
+    ( Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED ),
+    ( Py_mod_gil, Py_MOD_GIL_NOT_USED ),
+    ( Py_mod_state_size, core::mem::size_of::<MyModuleState>() ),
+].into());
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn PyModExport_mymodule() -> *mut PyModuleDef_Slot {
+    MODULE.as_mut_ptr()
+}
