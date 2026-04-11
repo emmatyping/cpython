@@ -588,7 +588,9 @@ _zstd_ZstdDecompressor_unused_data_get_impl(ZstdDecompressor *self)
 
     PyMutex_Lock(&self->lock);
 
-    if (!self->eof) {
+    // If we aren't done decompressing or no input data has been given,
+    // return empty bytes
+    if (!self->eof || self->input_buffer == NULL) {
         PyMutex_Unlock(&self->lock);
         return Py_GetConstant(Py_CONSTANT_EMPTY_BYTES);
     }
