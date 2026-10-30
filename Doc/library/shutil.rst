@@ -830,7 +830,7 @@ provided.  They rely on the :mod:`zipfile` and :mod:`tarfile` modules.
    - *xztar*: xz'ed tar-file (if the :mod:`lzma` module is available).
    - *zstdtar*: Zstandard compressed tar-file (if the :mod:`compression.zstd`
      module is available).
-   - *whl*: wheel file.
+   - *whl*: `wheel file <https://packaging.python.org/en/latest/discussions/package-formats/#what-is-a-wheel>`__.
 
    You can register new formats or provide your own unpacker for any existing
    formats, by using :func:`register_unpack_format`.
